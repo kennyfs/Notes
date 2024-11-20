@@ -69,7 +69,7 @@ abbr: PAC=probably approximately correct
 HTML week 4
 ===
 
-bound the distance between $E_in$ and $E_out$ by the number of hypotheses. but for infinite hypotheses? classify them into dichotomies(from parameters to the classification results of samples). In binary classification problem, the number of dichotomies is upper bounded by $2^N$ where N is the number of samples. growth function: the maximum number of dichotomies among possible inputs(to make it independent of inputs), denoted as $m_{\mathcal{H}}(N)$. But for some tasks, the number of dichotomies may be lower, 
+bound the distance between $E_in$ and $E_out$ by the number of hypotheses. but for infinite hypotheses? Classify them into dichotomies(from parameters to the classification results of samples). In a binary classification problem, the number of dichotomies is upper bound by $2^N$ where N is the number of samples. growth function: the maximum number of dichotomies among possible inputs(to make it independent of inputs), denoted as $m_{\mathcal{H}}(N)$. But for some tasks, the number of dichotomies may be lower, 
 * 1D perceptron, $f(x)=sign(x-h)$, $m_{\mathcal{H}}(N)=N+1$,bp:2
 * positive intervals(1D), $f(x)=1$ if $x\in [l,r),\ 0$ otherwise, $m_{\mathcal{H}}(N)=\binom{N+1}{2}+1=\frac{1}{2}N^2+\frac{1}{2}N+1$, bp:3
 * Convex sets(2D), 用凸的圖形把一個分類包起來，$m_{\mathcal{H}}(N)=2^N$, bp:no
@@ -77,7 +77,7 @@ bound the distance between $E_in$ and $E_out$ by the number of hypotheses. but f
 
 $k$ is a breakpoint if $m_{\mathcal{H}}(k)<2^k$, property: all $n>$minimum break point are break points.
 For some N, k inputs can be shattered by $\mathcal{H}\Leftrightarrow\ m_{\mathcal{H}}(N)=2^N$ 
-For a set of hypotheses for a task, VC dimension=breakpoint-1, VC dimension means the last $n$ s.t. the hypotheses can shatter any possible N inputs. VC dimension can be understood as the strength of a set of hypotheses. 
+For a set of hypotheses for a task, VC dimension=breakpoint-1, VC dimension means the last $n$ s.t. the hypotheses can shatter any possible N inputs. VC dimension can be view as the strength of a set of hypotheses. 
 
 It's proven that for $N\ge 2, k\ge 3$, $m_{\mathcal{H}}(N)\le N^{k-1}$
 
@@ -86,8 +86,8 @@ HTML week 5
 
 ## Error functions are application/user-dependent. 
 Example: 
-* In a supermarket fingerprint verification system that verify customer and collect points for discount, false reject is serious problem.
-* In CIA, false accept will be *VERY* serious because we let intruders in.
+* In a supermarket fingerprint verification system that verifies customers and collects points for discounts, false rejection is a serious problem.
+* In the CIA, false acceptance will be *VERY* serious because we let intruders in.
 
 HTML week 6
 ===
@@ -117,19 +117,19 @@ low $E_{\text{in}}$, high $E_{\text{out}}$
 * data cleaning/pruning
 * data hinting
 * regularization
-* validation
+* Validation
 
-### data cleaning/pruning
+### Data cleaning/pruning
 
 Maybe automatically detect outliers, and
 * data cleaning: correct the label
 * data pruning: remove the sample
-effect may be limited
+the effect may be limited
 
 ### data hinting
 
-example: slightly shift/rotate images to generate more data.
-aka data augmentation
+Example: slightly shift/rotate images to generate more data.
+Aka data augmentation
 
 HTML week 8
 ===
@@ -149,7 +149,7 @@ practical: $\frac{K}{N}=20\%$
 $K=1$
 When choose n-th data as validation set, $E_{\text{val}}=e_n$
 
-#### leave-one-out cross validation estimate
+#### leave-one-out cross-validation estimate
 
 $E_{loocv}(\mathcal{H},\mathcal{A})=\frac{1}{N}\sum_{n=1}^N e_n$
 Hope $E_{loocv}(\mathcal{H},\mathcal{A})\approx E_{\text{out}}(g)$
@@ -159,7 +159,7 @@ $$
 
 #### disadvantage
 
-It takes a lot of time. not practical.
+It takes a lot of time. Not practical.
 
 ### V-fold Cross Validation
 
@@ -168,7 +168,7 @@ practical: $V=5\sim 10$
 
 ### Don't fool yourself
 
-report test result instead of best validation result.
+Report test result instead of best validation result.
 
 ## Three principles
 
@@ -206,7 +206,7 @@ One possible solution: emphasize later samples
 
 ### Data Snooping
 
-If designing the model while snooping(偷看) data, it may overfits.
+If designing the model while snooping(偷看) data, it may overfit.
 If a data set has affected any step in the learning process, its ability to assess the outcome has been compromised.
 
 * 偷看test data，並照資料做model，失去test data獨立的作用。像是投信調參數做出過去績效很好的指數來發行ETF，但是未來表現未必好。
@@ -218,12 +218,12 @@ carefully balance between data-driven modeling(snooping) and validation (no-snoo
 
 ## Linear Support Vector Machine
 
-### Fatness for a model solving linearly saparatable data
+### Fatness for a model solving linearly separable data
 
-> If there are many hypotheses can perfectly solve this, choose the one with largest "Robustness"(can classify even if some test data is affected by noise.)
+> If many hypotheses can perfectly solve this, choose the one with the largest "Robustness"(can classify even if some test data is affected by noise.)
 
 Robustness = Fatness of saparating hyperplane = the distance to the nearest $x_n$(margin).
-Choose the one with largest margin and can perfectly saparate data.
+Choose the one with the largest margin and can perfectly separate data.
 
 ### Distance to Hyperplane
 
@@ -241,11 +241,11 @@ Goal: Find $argmax_{b,w} \frac{1}{\|w\|}$ subject to $\min_{n} y_n(w^Tx+b)=1$
 
 > If $\min_{n} y_n(w^Tx+b)>1$, say $1.127$, we can let $b'=\frac{b}{1.127}, w'=\frac{w}{1.127}$ so that $\frac{1}{\|w\|}$ is larger.
 
-Origin of name: The optimal boundary only depends on nearest points(support vectors(candidates)).
+Origin of name: The optimal boundary only depends on the nearest points(support vectors(candidates)).
 
 #### Solve with QP(Quadratic Programming)
 
-It's equivalent to find minimum of $\frac{1}{2}w^Tw$. And minimum of $\frac{1}{2}u^TQu+p^Tu$ subject to $a_m^Tu\ge c_m$ for $m=1,\ldots,M$,
+It's equivalent to finding the minimum of $\frac{1}{2}w^Tw$. And minimum of $\frac{1}{2}u^TQu+p^Tu$ subject to $a_m^Tu\ge c_m$ for $m=1,\ldots,M$,
 where 
 $$
 u=\begin{bmatrix}
@@ -311,24 +311,24 @@ For the best $\vec\alpha'$, the above also holds, so
 $$
 \min_{b,\textbf{w}}\left(\max_{all\ \alpha_n\ge 0}\mathcal{L}(b,\textbf{w},\vec\alpha)\right)\ge \max_{all\ \alpha'_n\ge 0}\left(\min_{b,\textbf{w}}\mathcal{L}(b,\textbf{w},\vec\alpha')\right)
 $$
-LHS is equivalent to original SVM, called primal. RHS is called Lagrange dual.
+LHS is equivalent to the original SVM, called primal. RHS is called Lagrange dual.
 
 ### Strong/weak Duality of QP
 
-In Lagrange dual problem,
+In the Lagrange dual problem,
 * $\ge$: weak duality
 * $=$: strong duality, when
     * convex primal
     * feasible primal($\Phi$-separable(after transform))
     * linear constraints
 
-If strong duality, exists primal-dual optimal solution for both sides.
+Strong duality means there exists a primal-dual optimal solution for both sides.
 
 ### Solving
 
 #### eliminate b
 
-Since inner $\min_{b,\textbf{w}}$ has no constraints on $\vec\alpha$ (unconstrained), we can simply take partial derivative on $b$.
+Since inner $\min_{b,\textbf{w}}$ has no constraints on $\vec\alpha$ (unconstrained), we can simply take a partial derivative on $b$.
 $$
 \begin{align*}
 &\mathcal{L}(b,\textbf{w},\vec\alpha)=\frac{1}{2}\textbf{w}^T\textbf{w}+\sum_{n=1}^N \alpha_n(1-y_n(\textbf{w}^T\textbf{z}_n+b))\\
@@ -349,7 +349,7 @@ Since the last term is $0$.
 
 #### find w 
 
-Similarly, we can simply take partial derivative on $\textbf{w}$.
+Similarly, we can simply take a partial derivative on $\textbf{w}$.
 $$
 \begin{align*}
 &\mathcal{L}(b,\textbf{w},\vec\alpha)=\frac{1}{2}\textbf{w}^T\textbf{w}+\sum_{n=1}^N \alpha_n(1-y_n(\textbf{w}^T\textbf{z}_n+b))\\
@@ -368,10 +368,10 @@ Under addtional constraints for $\max$: $\sum_{n=1}^N \alpha_ny_n=0$ and $\textb
 
 ### KKT condition
 
-If $(b,\textbf{w},\vec\alpha)$ is a optimal solution for Lagurange dual, and
-* 原本的問題有解，primal feasible:
+If $(b,\textbf{w},\vec\alpha)$ is a optimal solution for Lagrange dual, and
+* 原本的問題有解， primal feasible:
 $y_n(\textbf{w}^T\textbf{z}_n+b)\ge 1$
-* 滿足Dual的條件，dual feasible:
+* 滿足Dual的條件， dual feasible:
 $\alpha_n\ge 0$
 * 滿足Dual的最佳化條件，因此內部是optimal，dual-inner optimal:
 $\sum_{n=1}^N \alpha_ny_n=0$ and $\textbf{w}=\sum_{n=1}^N \alpha_ny_n\textbf{z}_n$
@@ -416,11 +416,11 @@ $$
 | $\textbf{w}_{SVM}=\sum_n \alpha_n(y_n\textbf{z}_n)$ | $\textbf{w}_{PLA}=\sum_n \beta_n(y_n\textbf{z}_n)$          |
 | $\alpha_n$從 dual solution。                        | $\beta_n=$ # of mistake corrections on $(\textbf{x}_n,y_n)$ |
 
-$\textbf{w}$ is linear combination of $y_n\textbf{z}_n$. This is also true for GD/SGD-based Logistic regression/Linear regression, when $\textbf{w}_0=0$.
+$\textbf{w}$ is linear combination of $y_n\textbf{z}_n$. This is also true for GD/SGD-based Logistic regression/Linear regression when $\textbf{w}_0=0$.
 $\textbf{w}$ is represented by data.
-SVM: represented by SV's only.
+SVM: represented by SVs only.
 
-#### 比較 primal dual
+#### 比較 primal 與 dual
 
 ### Problems
 
@@ -482,8 +482,8 @@ $G(x)=\text{sign}(\sum_t \alpha_t\cdot g_t(x))$ with $\alpha_t\ge 0$
 $G(x)=\text{sign}(\sum_t q_t(x)\cdot g_t(x))$ with $q_t(x)\ge 0$
 
 ### 比較
-* selection
-也就是第一種，很簡單也很常用，rely on strong hypothesis
+* Selection
+也就是第一種，很簡單也很常用， rely on strong hypothesis
 當然應該用 $E_{\text{val}}$ 而不是 $E_{\text{in}}$，但同樣的需要確保validation用的 $g_t^-$夠強
 * aggregation/blending
 參考其他弱一點的朋友(hypothesis)可能會更好
@@ -517,14 +517,14 @@ $$
 Therefore, the uniform blending is better than the average of $g_t$.
 
 This can also be interpreted as:  
-(expected performance of randomly choose one hypothesis)  
+(expected performance of randomly choosing one hypothesis)  
 = (expected deviation to consensus)  
 \+ (performance of consensus).  
 
 * performance of consensus: **bias**
 * expected deviation to consensus: **variance**
 
-uniform blending reduces variance for more stable performance.
+Uniform blending reduces variance for more stable performance.
 
 HTML week 12
 ===

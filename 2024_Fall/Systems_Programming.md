@@ -70,7 +70,7 @@ open options:
 
 ### Misc  
 
-open always returns lowest unopened descriptor: 回收已經close的descriptor  
+open always returns the lowest unopened descriptor: 回收已經close的descriptor  
 
 ## lseek  
 
@@ -100,7 +100,7 @@ open always returns lowest unopened descriptor: 回收已經close的descriptor
 
 ### dup  
 
-return lowest available file descriptor  
+Return the lowest available file descriptor.  
 
 ### dup2  
 
@@ -130,11 +130,11 @@ Here's a refined and improved version of your notes with minor corrections and a
 
 - **daemon** | Background process that runs independently of terminal sessions.  
 
-- **fcntl** | Modify file descriptor properties, duplicate descriptors, set/get file flags.  
+- **fcntl** | Modify file descriptor properties, duplicate descriptors, or set/get file flags.  
   - **Flags**:  
     - `FD_CLOEXEC` | Close file descriptor on `exec` calls, preventing leakage of descriptors to child processes.  
     - File status flags (e.g., `O_APPEND`) modify behavior at the file level.  
-    - `procID`, `groupID`, `file lock` allow control over process ownership and access.  
+    - `procID`, `groupID`, and `file lock` allow control over process ownership and access.  
     - **Access modes**: `O_RDONLY`, `O_WRONLY`, `O_RDWR` control read/write permissions.  
 
 - **dup** | Duplicates a file descriptor.  
@@ -153,20 +153,20 @@ Here's a refined and improved version of your notes with minor corrections and a
 ### Chapter 4, p.1 ~ Advanced I/O  
 
 - **Slow System Calls** | Can block a process indefinitely if resources are unavailable.  
-  - Examples: Pipes, terminal input, network operations may wait for data or user actions.  
+  - Examples: Pipes, terminal input, and network operations may wait for data or user actions.  
 
 - **Disk I/O** | Processes can block waiting for disk I/O indefinitely unless interrupted or the disk becomes unresponsive.  
 
 - **Terminal Mode**  
   - **Canonical Mode**: Input is buffered and processed line-by-line.  
   - **Non-canonical Mode**: Also known as raw mode, allows character-by-character processing, commonly used for real-time applications.  
-  - **R/W from/to disk is never slow system call**  
+  - **R/W from/to disk is never a slow system call**  
 
 ---  
 
 ### I/O Multiplexing  
 
-- **Purpose**: Monitor multiple file descriptors simultaneously without blocking on any specific one. This is essential for applications handling multiple I/O sources, like servers.  
+- **Purpose**: Monitor multiple file descriptors simultaneously without being blocked by any specific one. This is essential for applications handling multiple I/O sources, like servers.  
 
 - **`select` System Call**  
   - Used to monitor multiple descriptors for readability, writability, or exceptional conditions.  
@@ -177,9 +177,9 @@ Here's a refined and improved version of your notes with minor corrections and a
 - **Macros**:  
   - `FD_ZERO`, `FD_SET`, `FD_ISSET`, `FD_CLR` are used to manage file descriptor sets.  
   - Example Usage:  
-    ```c  
+ ```c  
     ready_count = select(nfds, &readfds, &writefds, &exceptfds, &timeout);  
-    ```  
+ ```  
   - `ready_count` represents the number of ready descriptors, which the program can process sequentially.  
 
 - **Timeouts**:  
@@ -231,7 +231,7 @@ ready的東西會變成1，其他0
     * any read lock exists, allow read lock 實務上會看有沒有write lock，避免starving  
 * exclusive write lock  
 
-### release of lock  
+### Release of lock  
 
 **只要(process, file)對了就會release**，像是  
 ```c  
@@ -262,7 +262,7 @@ Linux and SVR3: set-group-id on, group x off
 
 * File Pointers vs File Descriptors  
 * stream  
-* FILE object: fd, pointer, to buffer, buffer size, error/EOF flag, etc.  
+* FILE object: fd, pointer, buffer, buffer type, buffer size, error/EOF flag, etc.  
 * stdin, stdout, stderr vs STDIO_FILENO, STDOUT_FILENO, STDERR_FILENO  
 
 ## system calls  
@@ -271,26 +271,26 @@ Linux and SVR3: set-group-id on, group x off
 * `FILE *freopen(path,type,FILE *fp)`  
     * close fp, clear orientation(multibyte words)  
     * `freopen(file,type,stdout)` $\approx$ `int fd=open(file,mode);dup2(fd,1);close(fd);`  
-* `FILE *fdopen(filedes,type)`: for existing files, no truncate for w. Usually for pipes, network channels  
+* `FILE *fdopen(filedes, type)`: for existing files, no truncate for w. Usually for pipes, network channels  
 * `fileno(FILE *fp)`: get file descriptor  
 * `fclose(FILE *fp)`  
     * flush output  
     * discard input  
-    * all fps are closed after process exits  
+    * all fps are closed after the process exits  
     * **buffer must be valid**(don't set buf to local variable)  
 
 ### Buffering  
 
-* fully buffered  
-* line buffered  
+* fully-buffered  
+* line-buffered  
     * 例外:scanf after printf(without \n), will trigger I/O  
 * unbuffered  
 
-depends on output type  
+depends on the output type  
 
-* stdout and stdin are fully buffered unless interactive devices(terminal): line buffered  
+* stdout and stdin are fully buffered unless interactive devices(terminal): line-buffered  
 * stderr: unbuffered  
-* file: fully buffered  
+* File: fully-buffered  
 
 ### Synchronize Data  
 
@@ -298,7 +298,7 @@ depends on output type
 
 ### Set buffer  
 
-Any operations on streams will have OS allocate buffer  
+Any operations on streams will have OS allocate a buffer.  
 
 * `void setbuf(*fp,*buf)`  
     * size=BUFSIZE(defined in stdio.h)  
@@ -314,7 +314,7 @@ Any operations on streams will have OS allocate buffer
 * `long ftell(*fp)`: get current file offset (review=`lseek(fd,0,SEEK_CUR)`)  
 * `int fseek(*fp,offset,whence)`: =`lseek`  
 * `void rewind(*fp)`: =`fseek(*fp,0,SEEK_SET)`  
-* For different type:  
+* For different types:  
     * `off_t`: `fello`, `fseeko`  
     * `fpos_t`: `fgetpos`, `fsetpos`  
 
@@ -324,20 +324,20 @@ Any operations on streams will have OS allocate buffer
 
 ##### Character-at-a-time  
 
-* `int getc(*fp)`: may be a macro  
+* `int getc(*fp)`: maybe a macro  
 * `int fgetc(*fp)`  
 * `int getchar(void)`=`getc(stdin)`  
 -1 for EOF or error(call some function to check it)  
 > `char` may be signed or unsigned(system dependent)  
-> So do NOT write `char c;while((c=getchar())!=EOF)...`, just use `int` as instucted.  
+> So do NOT write `char c; while((c=getchar())!=EOF)...`, just use `int` as instructed.  
 
-about error and EOF:  
+About error and EOF:  
 error and EOF flags are stored in `FILE`  
 * `int ferror(*fp)` and  
 * `int feof(*fp)`: non-zero=true, zero=false  
 * `void clearerr(*fp)`: clear both  
 
-- `ungetc(c,*fp)`: c cannot be EOF, clear EOF flag, stored in buffer  
+- `ungetc(c,*fp)`: c cannot be EOF, clear EOF flag, stored in the buffer  
 Ex: skip spaces before character: By reading and checking if is space until is not and put it back.  
 
 `putc(int c,*fp)`, `fputc(int c,*fp)`, `putchar(int c)`: same as reading(all `int`)  
@@ -354,7 +354,7 @@ write is not really "Line-at-a-Time"
 
 ##### Direct/Binary I/O  
 
-R/W a number of objects of a specified size  
+R/W some objects of a specified size  
 alias: object-at-a-time I/O, record/structure-oriented I/O  
 
 * `size_t fread(*ptr,size,nobj,*fp)`: 讀取nobj個size為bytes的object到ptr  
@@ -465,7 +465,7 @@ file
 ## set-user-id, set-group-id  
 
 執行檔把擁有者的權限借給執行者，跑起來effective user id會是file owner  
-user/group id:  
+User/group id:  
 
 * real: 真正的執行者(access是看real user)  
 * effective: 檢查file permission是看effective  
@@ -475,14 +475,14 @@ user/group id:
 - set-group-id: 02000, `S_ISGID` in st_mode, `--- --s ---`, `S` if X is not set  
 ## check permission  
 
-> Q: How to share file without setting group?  
+> Q: How to share files without setting up a group?  
 > A: Set directories `rwx--x--x`, only my friend knows the file name, other users cannot list files.  
 
 > Q: 老師發現成績檔案的others write權限沒關，關完確定內容沒錯，但還是被改了？！  
 > A: 只會在open時確認permission，所以壞學生開好後不關process，等到老師確認完再改。  
-1. effective UID is superuser? -> yes  
-2. effective UID is UID of file? -> check owner permission  
-3. effective GID or any of supplementary groups is GID of file? -> check group permission  
+1. Is effective UID is superuser? -> yes  
+2. Is effective UID the UID of the file? -> Check owner permission  
+3. Is effective GID or any of the supplementary groups the GID of the file? -> Check group permission  
 4. check others permission  
 
 ## owner of a new file  
@@ -491,15 +491,15 @@ user/group id:
 * GID=  
     * effective GID  
     * GID of directory  
-        * some OS always do, some needs set-group-id of directory, ex: `/var/spool/mail`  
+        * Some OS always do, some need the set-group-id of the directory, ex: `/var/spool/mail`  
 
 SVR3 & Linux provide mandatory locks by **turning on set-group-id** but **turning off group-X**.  
-Therefore, superuser checks if some files has set-user/group-id ,**especially those owned by root!** (by `find`)  
+Therefore, the superuser checks if some files have set-user/group-id,**especially those owned by root!** (by `find`)  
 
 ## access  
 `access(path,mode)`  
 mode:`R_OK`,`W_OK`,`X_OK`,`F_OK`(existence)  
-Check the real UID/GID. Ex: A set-user-id program want to check if the real user can access the file.  
+Check the real UID/GID. Ex: A set-user-id program wants to check if the real user can access the file.  
 ## umask  
 
 user file creation mask  
@@ -524,7 +524,7 @@ mask從parent inherit，改了自己的不影響parent的
 
 ### security issues  
 
-* Only superuser can set sticky bit, otherwise will be turned off.  
+* Only the superuser can set sticky bit, otherwise will be turned off.  
 * If GID of new file $\neq$ effec. GID (and is not superuser), clear set-group-id. (所以owner不會亂借權限)  
 * Clear set-user/group-id if a normal user(non-superuser) writes to a file.  
 
@@ -552,11 +552,11 @@ mask從parent inherit，改了自己的不影響parent的
 * Compiler-time: ex: range of short  
 * Run-time:  
 Can be queried by process  
-    * Related to file/dir, `pathconf(path, name)`  
-    ex: maximum bytes in a filename  
-    (or `fpathconf` for filedes)  
-    * Others, `sysconf(name)`  
-    ex: maximum # of opened files per process  
+ * Related to file/dir, `pathconf(path, name)`  
+ ex: maximum bytes in a filename  
+ (or `fpathconf` for filedes)  
+ * Others, `sysconf(name)`  
+ ex: maximum # of opened files per process  
 
 ## truncate  
 
@@ -565,15 +565,15 @@ Can be queried by process
 
 ## UNIX file and directory  
 
-### structrue  
+### structure  
 
 根目錄下有各種資料夾，裝置也會是一個file，disk partition可以mount到directory  
 Hard Drive:  
 * partition:每個是一個file system  
     * boot blocks  
-    * super block: metadata  
+    * superblock: metadata  
     * cylinder groups  
-        * super block copy  
+        * superblock copy  
         * cg info  
         * i-node map  
         * i-nodes  
@@ -583,7 +583,7 @@ Hard Drive:
 
 map概念:每個bit記i-node/data block是否被用  
 i-node要記很多東西，比如owner, type, file size, 佔了哪些block  
-dir block:link to i-node, filename  
+dir block: link to i-node, filename  
 
 > * 邏輯大小>data block size:用lseek到很後面寫入會造成hole  
 > * 邏輯大小<data block size:占不完整的block  
@@ -625,7 +625,7 @@ i-node number: st_ino
 
 ### link/unlink  
 
-`int link(existingpath, newpath)`  
+`int link(existing_path, new_path)`  
 `int unlink(path)`  
 指hard link  
 把i-node hard link counts -1  
@@ -644,8 +644,8 @@ i-node number: st_ino
 
 ### symbolic link  
 
-* `int symlink(const char *actualpath, const char *sympath)`  
-* `int readlink(const char *pathname, char *buf, int bufsize)`  
+* `int symlink(const char *actual_path, const char *sym_path)`  
+* `int readlink(const char *pathname, char *buf, int buf_size)`  
 Get the actual path in buf. Involves open, read, close. No `\0` at last.  
 
 ### File times  
@@ -665,7 +665,7 @@ Get the actual path in buf. Involves open, read, close. No `\0` at last.
 
 system call:`utime`改變時間  
 
-### Functions about dir  
+### Functions for directory  
 
 * `int mkdir(path, mode)`  
 * `int rmdir(path)`  
@@ -677,14 +677,14 @@ system call:`utime`改變時間
 ### ftw  
 
 file tree walk  
-`int ftw(char* dirpath, *fn(char* fpath,stat *sb,typeflag), nopenfd)`  
+`int ftw(char* dir_path, *fn(char* f_path,stat *sb,type_flag), n_openfd)`  
 * dirpath要開的資料夾  
 * fn找到新檔案會呼叫的函數  
 * nopenfd允許開啟的fd數量，太少tree又太深的話就會只留下面幾層，每次要換目錄就得要從dirpath重新開始，浪費時間  
 
 ### chdir fchdir getcwd  
 
-process有current walking directory(cwd)，就是記device id和i-node number  
+process有current walking directory(CWD)，就是記device id和i-node number  
 和`umask`一樣要是built-in command，因為current walking directory和user file creation mask一樣是independently inherit from parent。所以如果是一個執行檔，執行起來只會改child process的這兩個變數。  
 
 > `chdir` follows soft link:因為讀的是檔名，從根目錄開始找i-node，「輸出」是i-node  
@@ -708,7 +708,7 @@ D --> E[exit];
 Special process  
 * 0: swapper  
 * 1: user process  
-* 2: vitual memory管理  
+* 2: virtual memory管理  
 
 ## Booting  
 
@@ -728,8 +728,8 @@ Bootstrapping
 會有個table存所有process的資訊，每個entry是一個PCB:  
 * process state:  
     * ready:資料在memory  
-    * waiting/block:I/O etc  
-    * running  
+    * waiting/block: I/O etc  
+    * Running  
 * program counter:跑到哪個指令  
 * CPU regiester:CPU狀態(context switch 回去要能繼續跑)  
 * CPU scheduling info\:process的優先度etc  
@@ -813,7 +813,7 @@ C程式隨時可以`_exit`、`_Exit`(分別是ANSI、POSIX，沒什麼差)自殺
 * 會倒序呼叫exit handler  
 * flush, close I/O  
 
-> Core=memory,eg core dumped  
+> Core=memory, eg core dumped  
 
 ### exit handler  
 
@@ -875,7 +875,7 @@ l,v選一個
 * v: `argv[]` as input of main  
 
 額外加e,p  
-* e: includes environment variables(HOME, PATH, etc)，其實main也可以輸入，否則要用`extern char **eviron`  
+* e: includes environment variables(HOME, PATH, etc)，其實main也可以輸入，否則要用`extern char **environ`  
 * p: 會去PATH找執行檔的位置，允許filename是shell script  
 
 `execl, execlp, execle, execv, execvp, execve`  
@@ -903,7 +903,7 @@ shell會有個.bashrc，先設好Environment Variables則shell跑的程式都會
 
 ## pipe  
 
-buffered I/O。如果兩個人寫，寫超過buffer size可能會interleave:"abcd","1234",result "a1b2c3d4"  
+buffered I/O。如果兩個人寫，寫超過buffer size可能會interleave: "abcd", "1234", result "a1b2c3d4"  
 
 ### 限制  
 
@@ -1019,13 +1019,13 @@ Default 通常是 Terminate、Ignore、Stop
 
 | Signal    | Default Action   | Description                                                                                                                                    |
 | --------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SIGABRT` | Terminate w/core | By calling `abort()`                                                                                                                           |
-| `SIGALRM` | Terminate        | By calling `setitimer()`, `alarm()`                                                                                                            |
+| `SIGABRT` | Terminate w/core | By calling `abort()` |
+| `SIGALRM` | Terminate        | By calling `setitimer()`, `alarm()` |
 | `SIGCHLD` | Ignore           | Child process state change (e.g., execution, stopping)                                                                                         |
-| `SIGFPE`  | Terminate w/core | Division by zero, floating point overflow, etc.                                                                                                |
-| `SIGHUP`  | Terminate        | Originally used for terminal disconnection; now used to signal background processes (e.g., servers) for rereading config files(avoid stopping) |
-| `SIGINT`  | Terminate        | DELETE/Ctrl-C                                                                                                                                  |
-| `SIGIO`   | Terminate/Ignore | 最厲害非同步，叫系統讀到某個buffer，搞定後傳這個signal。=`SIGPOLL`                                                                             |
+| `SIGFPE` | Terminate w/core | Division by zero, floating point overflow, etc.                                                                                                |
+| `SIGHUP` | Terminate        | Originally used for terminal disconnection; now used to signal background processes (e.g., servers) for rereading config files(avoid stopping) |
+| `SIGINT` | Terminate        | DELETE/Ctrl-C                                                                                                                                  |
+| `SIGIO` | Terminate/Ignore | 最厲害非同步，叫系統讀到某個buffer，搞定後傳這個signal。=`SIGPOLL` |
 | `SIGKILL` | Terminate        | Cannot be ignored or caught                                                                                                                    |
 | `SIGPIPE` | Terminate        | reader of pipe/socket terminated                                                                                                               |
 | `SIGQUIT` | Terminate w/core | Ctrl-\，terminate foreground process                                                                                                           |
@@ -1033,7 +1033,7 @@ Default 通常是 Terminate、Ignore、Stop
 | `SIGSTOP` | Stop process     | Cannot be ignored or caught                                                                                                                    |
 | `SIGTSTP` | Stop process     | Ctrl-Z，可以catch                                                                                                                              |
 | `SIGTERM` | Terminate        | `kill` command                                                                                                                                 |
-| `SIGURG`  | ignore           | 網路課，out-of-band data: 傳資料網路塞車，要維持品質                                                                                           |
+| `SIGURG` | ignore           | 網路課，out-of-band data: 傳資料網路塞車，要維持品質                                                                                           |
 | `SIGUSR1` | Terminate        | user defined                                                                                                                                   |
 | `SIGUSR2` | Terminate        | user defined                                                                                                                                   |
 
@@ -1044,16 +1044,16 @@ Default 通常是 Terminate、Ignore、Stop
 
 | Signal      | Default Action   | Description                                                                        |
 | ----------- | ---------------- | ---------------------------------------------------------------------------------- |
-| `SIGBUS`    | Terminate w/core | Implementation-defined HW fault (e.g., memory alignment error, undefined behavior) |
-| `SIGCONT`   | Continue/Ignore  | Continue a stopped process                                                         |
-| `SIGILL`    | Terminate w/core | illegal hardware instruction, rarely seen                                          |
-| `SIGPROF`   | terminate        | 鬧鐘響                                                                             |
-| `SIGPWR`    | ignore           | ~~電池沒電~~，UPS沒電，init shutdowns the system                                   |
-| `SIGSYS`    | Terminate w/core | Invalid sys call                                                                   |
+| `SIGBUS` | Terminate w/core | Implementation-defined HW fault (e.g., memory alignment error, undefined behavior) |
+| `SIGCONT` | Continue/Ignore  | Continue a stopped process                                                         |
+| `SIGILL` | Terminate w/core | illegal hardware instruction, rarely seen                                          |
+| `SIGPROF` | terminate        | 鬧鐘響                                                                             |
+| `SIGPWR` | ignore           | ~~電池沒電~~，UPS沒電，init shutdowns the system                                   |
+| `SIGSYS` | Terminate w/core | Invalid sys call                                                                   |
 | `SIGVTALRM` | Terminate        | 只看user CPU time的alarm                                                           |
-| `SIGWINCH`  | ignore           | terminal size changed                                                              |
-| `SIGXCPU`   | Terminate w/core | 超過soft CPU time limit                                                            |
-| `SIGXFSZ`   | Terminate w/core | 超過soft soft file limit                                                           |
+| `SIGWINCH` | ignore           | terminal size changed                                                              |
+| `SIGXCPU` | Terminate w/core | 超過soft CPU time limit                                                            |
+| `SIGXFSZ` | Terminate w/core | 超過soft soft file limit                                                           |
 
 ### w/core but no core dump
 
@@ -1137,22 +1137,22 @@ Note: 因為原本的程式不知道自己被 signal 中斷，而 errno 在 hand
 
 ## Unreliable signals
 
-**signals could get lost!**  
+**Signals could get lost!**  
 Ex 1: 通常會在 handler 再註冊一次 `signal`，但如果要處理的 signal 剛好在這之前來就會照 default。
 
 Ex 2: 不想馬上處理 Ctrl-C，用：
 ```c=
 int flag=0;
 main(){
-    signal(SIGINT, handler);
-    ...
-    while(flag == 0)
-        pause(); // 等到flag=1(收到 signal)
-    // 做 Ctrl-C 時真的要做的事
+ signal(SIGINT, handler);
+ ...
+ while(flag == 0)
+ pause(); // 等到flag=1(收到 signal)
+ // 做 Ctrl-C 時真的要做的事
 }
 handler(){
-    signal(SIGINT, handler);
-    flag=1;
+ signal(SIGINT, handler);
+ flag=1;
 }
 ```
 看起來沒問題，但如果 signal 在5、6行間來就會等到死
@@ -1166,14 +1166,14 @@ process take action for the signal(deliver 可以被 block)
 
 中間時間為 **pending**
 
-### block a signal
+### Block a signal
 
 只能阻止 deliver，不能阻止 generate  
-A signal is blocked until: 1) being unblocked. 2) action becomes ignore.  
+A signal is blocked until: 1.) Being unblocked. 2.) Action becomes ignore.  
 * `sigpending(*set)`: 檢查 pending 的 signal，**blocked signal 也算 pending！**
-* `sigprocmask(how, *set, *old_set)`: 設定 **signal mask** (要擋哪些 signal)，與 cwd、umask 都是 independently inheritted。
+* `sigprocmask(how, *set, *old_set)`: 設定 **signal mask** (要擋哪些 signal)，與 cwd、umask 都是 independently inherited。
 
-#### block 時來 signal，unblock 會怎樣？
+#### block 時來 signal，再 unblock 會怎樣？
 
 都是 depend on implementation
 * 同 signal 來很多次：POSIX 沒有定義。像感覺遮斷一樣，有可能會 deliver 很多次，但也可能只是 on PCB 的 bit，所以只有一次。
@@ -1189,7 +1189,7 @@ A signal is blocked until: 1) being unblocked. 2) action becomes ignore.
 
 ### 可以 kill 的對象
 
-real or effec. uid of the sender == that of receiver (both are processes)
+Real or effective UID of the sender == that of the receiver (both are processes)
 
 ### signo 0
 
@@ -1204,7 +1204,7 @@ At least one (pending, unblocked) signal is **delivered** before `kill` or `rais
 ## alarm & pause
 
 * `unsigned int alarm(unsigned int secs)`: set alarm clock, return remaining time. Since default is termination, you have to catch it.
-* `int pause(void)`: suspend until signal comes. return if a signal handler is executed and returns.
+* `int pause(void)`: suspend until signal comes. Return if a signal handler is executed and returns.
 
 ### sleep1:
 ```c
@@ -1215,7 +1215,7 @@ int sleep1(int nsecs){
     if((old_handler=signal(SIGALRM, sig_alrm))==SIG_ERR)
         return nsecs;
     alarm(nsecs);
-    // If alarm somehow arrives here, pause will never return (race condition).
+    // If the alarm somehow arrives here, the pause will never return (race condition).
     pause();
     return alarm(0); // turn off alarm
 }
@@ -1236,7 +1236,7 @@ When a function is called, a stack frame is created. It contains:
 Put in the stack of the virtual memory.  
 Problems:
 * Review: `setvbuf` 不能用 local variable 作為 buffer。
-* `f1()` call vfork and return, child exits after calling f2(that may clean `pid` in stack). **Parent cannot access `pid` in stack.**
+* `f1()` call vfork and return, child exits after calling f2(that may clean `pid` in stack). **Parent cannot access `pid` in the stack.**
 
 ### Longjmp & setjmp
 
@@ -1248,7 +1248,7 @@ Problems:
 * stack pointers
 * return address
 
-理論上要用在很深的 stack: A call B, B call C,... Error occurs in C, then we can directly longjmp to A.  
+理論上要用在很深的 stack: A call B, B call C,... When an error occurs in C, then we can directly longjmp to A.  
 但其實 jmp 其實更 powerful，實際上可以亂跳。  
 
 #### Type qualifiers in C
@@ -1276,9 +1276,9 @@ unsigned int sleep2(unsigned int nsecs){
         pause(); 
         // alarm arrives after calling pause, pause will not return
         // and still jump to setjmp and return.
-    }
+ }
     return alarm(0);
 }
 ```
 
-Problem: If another signal comes(say `SIG_INT`), the `SIG_INT` handler saves and tries to restore the `errno`. But during the handler, alarm may comes and the `errno` is not restored.
+Problem: If another signal comes(say `SIG_INT`), the `SIG_INT` handler saves and tries to restore the `errno`. But during the handler, the alarm may come and the `errno` is not restored.
