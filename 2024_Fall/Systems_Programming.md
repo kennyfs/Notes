@@ -731,7 +731,7 @@ Bootstrapping
     * waiting/block: I/O etc  
     * Running  
 * program counter:跑到哪個指令  
-* CPU regiester:CPU狀態(context switch 回去要能繼續跑)  
+* CPU register:CPU狀態(context switch 回去要能繼續跑)  
 * CPU scheduling info\:process的優先度etc  
 * memory-management info\:OS會教  
 * Accounting info:跑多久etc  
@@ -1082,7 +1082,7 @@ sighandler_t signal(int signum, sighandler_t handler);
 想達成：若現在是 Ignore，則設為我的 handler。  
 由於沒有設計這樣的功能，可以這樣做：  
 ```c
-int sigint(); // 某 handler
+int sig_int(); // 某 handler
 if(signal(SIGINT, SIG_IGN)!=SIG_IGN){
     signal(SIGINT, sig_int);
 }
@@ -1133,29 +1133,37 @@ Ex: 如果需要回傳一個 array，local variable會消失、static 和 malloc
 
 > printf 雖然不是 reentrant，但為了 debug 還是會用。
 
-Note: 因為原本的程式不知道自己被 signal 中斷，而 errno 在 handler 可能被改，所以 handler 通常在一開始存起來、最後設回去。
+**Note**: 因為原本的程式不知道自己被 signal 中斷，而 errno 在 handler 可能被改，所以 handler 通常在一開始存起來、最後設回去。(但還是有可能其他 signal 在存好前來，導致無法還原，這在 unreliable signal 無解，得要把 signal block 掉)
 
 ## Unreliable signals
 
 **Signals could get lost!**  
-Ex 1: 通常會在 handler 再註冊一次 `signal`，但如果要處理的 signal 剛好在這之前來就會照 default。
+Ex 1: 註冊完只會有效一次，所以通常會在 handler 再 `signal` 註冊一次，但如果要處理的 signal 剛好在這之前來就會照 default。
 
-Ex 2: 不想馬上處理 Ctrl-C，用：
+Ex 2: 不想馬上處理 Ctrl-C，且 Ctrl-C 一定會來，來了之後才要繼續做事。  
+具體故事：  
+教授上課時知道當天有重要電話，但不能馬上接，可以
+1. 先接聽一秒問是誰打來的，用筆記寫下來，上課完再回電。  
+對應到在 handler 設一個 flag，做完要做的事若 flag 沒被設(上完課電話都還沒來)，就 `pause` 直到 flag 被設(待在教室等電話來)。  
+2. 開飛航模式，上課完才接電話(但是這裡比較特別，對方打電話不通會一直嘟嘟嘟不會 timeout)。  
+對應到把 signal block 掉，做完事再 `sigsuspend`(上完課再解除飛航模式)。  
+
+下面是第一種作法：
 ```c=
 int flag=0;
 main(){
- signal(SIGINT, handler);
- ...
- while(flag == 0)
- pause(); // 等到flag=1(收到 signal)
- // 做 Ctrl-C 時真的要做的事
+  signal(SIGINT, handler);
+  ...
+  while(flag == 0)
+    pause(); // 等到flag=1(收到 signal)
+  // 做 Ctrl-C 時真的要做的事
 }
 handler(){
- signal(SIGINT, handler);
- flag=1;
+  signal(SIGINT, handler);
+  flag=1;
 }
 ```
-看起來沒問題，但如果 signal 在5、6行間來就會等到死
+看起來沒問題，但如果 signal 在5、6行間來就會等到死，所以不能這樣寫。
 
 ## Reliable signals
 
@@ -1181,17 +1189,17 @@ A signal is blocked until: 1.) Being unblocked. 2.) Action becomes ignore.
 
 ## kill & raise
 
-* `int kill(pid, signo)`: send `signo` to `pid`
+* `int kill(pid, signum)`: send `signum` to `pid`
     * `pid>0`: to process
     * `pid==0`: all processes with the same gid
     * `pid<0`: to all processes with gid==-pid
-* `int raise(signo)`: send `signo` to myself.(=`getpid`+`kill`)
+* `int raise(signum)`: send `signum` to myself.(=`getpid`+`kill`)
 
 ### 可以 kill 的對象
 
 Real or effective UID of the sender == that of the receiver (both are processes)
 
-### signo 0
+### signum 0
 
 See if a process is alive.
 > 如果做的事是：如果某 process 是活的，則XXX。但有TOC-TOU問題（這種問題都是不常發生，但還是要避免）
@@ -1199,7 +1207,7 @@ See if a process is alive.
 ### behavior on signal to itself
 
 At least one (pending, unblocked) signal is **delivered** before `kill` or `raise` returns(不只這兩個).  
-**應用**: `abort`，關掉其他 signal，保證結束前會收到自殺 signal。
+**應用**: `abort`，關掉(block)其他 signal，保證結束前會收到自殺 signal。
 
 ## alarm & pause
 
@@ -1208,7 +1216,7 @@ At least one (pending, unblocked) signal is **delivered** before `kill` or `rais
 
 ### sleep1:
 ```c
-sighandler_t sig_alrm(int signo){
+sighandler_t sig_alrm(int signum){
     // do nothing, just to wake up pause
 }
 int sleep1(int nsecs){
@@ -1264,7 +1272,7 @@ Ex: `void *memcpy(void *restrict dest, const void *restrict src, size_t n)` and 
 
 ```c
 static jmp_buf env_alrm;
-static void sig_alrm(int signo){
+static void sig_alrm(int signum){
     longjmp(env_alrm, 1);
 }
 unsigned int sleep2(unsigned int nsecs){
@@ -1273,12 +1281,163 @@ unsigned int sleep2(unsigned int nsecs){
     if(setjmp(env_alrm)==0){
         alarm(nsecs);
         // alarm arrives here, handler jump to setjmp and return
-        pause(); 
-        // alarm arrives after calling pause, pause will not return
-        // and still jump to setjmp and return.
- }
-    return alarm(0);
+        pause(); // alarm arrives after calling pause, pause will 
+        // not return and still jump to setjmp and return.
+    }
+    return alarm(0); // remaining time(maybe waken up by other signal)
 }
 ```
 
-Problem: If another signal comes(say `SIG_INT`), the `SIG_INT` handler saves and tries to restore the `errno`. But during the handler, the alarm may come and the `errno` is not restored.
+Problem: If another signal comes(say `SIG_INT`), the `SIG_INT` handler saves and tries to restore the `errno`. But before the saving is done, the alarm may come and change the unsaved `errno`.  
+雖然不完美但還是有可能這樣寫。  
+
+## alarm + pause
+
+* Can act as a timeout  
+(for slow system call like `read`). But need to worry about 
+  * race condition
+  * autorestart of `read`(Linux does)
+* timeout & restart by longjmp
+
+## Signal Sets
+
+> 要養成用預設型別的好習慣，像是 `sigset_t`, `pid_t`, `uid_t` 等。  
+
+* `int sigemptyset(sigset_t *set)`  
+* `int sigfillset(sigset_t *set)`  
+* `int sigaddset(sigset_t *set, int sig_no)`  
+* `int sigdelset(sigset_t *set, int sig_no)`  
+* `int sigismember(const sigset_t *set, int sig_no)`  
+
+### sigprocmask  
+`sigprocmask(how, *set, *old_set)`  
+* `old_set`: return the old signal mask.
+* `how` can be `SIG_BLOCK`, `SIG_UNBLOCK`, `SIG_SETMASK`
+* If any unblocked signals are pending, at least one
+of unblocking signals will be delivered before the
+sigprocmask() returns.(as `kill` to myself and `raise`)  
+
+### sigpending  
+`int sigpending(sigset_t *set)`
+return the set of signals that are blocked and pending.
+
+### example 
+
+```c
+static void sig_quit(int signum) {
+    printf("caught SIGQUIT\n");
+    signal(SIGQUIT, SIG_DFL);
+    // restored to default
+}
+
+int main(void) {
+    sigset_t newmask, oldmask, pendmask;
+
+    signal(SIGQUIT, sig_quit);
+
+    sigemptyset(&newmask);
+    sigaddset(&newmask, SIGQUIT);
+    sigprocmask(SIG_BLOCK, &newmask, &oldmask);
+    // save original to oldmask so that we can restore it later
+
+    sleep(5);
+
+    sigpending(&pendmask);
+    if (sigismember(&pendmask, SIGQUIT))
+        printf("\nSIGQUIT pending\n");
+        // 在等五秒期間希望 SIGQUIT 被 triggered
+
+    sigprocmask(SIG_SETMASK, &oldmask, NULL); // 在這個瞬間去處理 sig_quit
+    // 大多的系統只處理一次，所以如果在上面 sleep 按了很多次 ^\ ，還是會當作只有一次，先印出下面這行然後才結束。
+    printf("SIGQUIT unblocked\n");
+
+    sleep(5);
+    exit(0);
+}
+```
+## Reliable signal
+
+### sigaction
+
+特色
+* **一次註冊終身有效**
+* 才是 **reliable** 版本
+* `signal` 可能是 call `sigaction`
+* Signal mask
+  * Additional signals can be masked before the handler function is called.
+  * The caught signal is **blocked** in the handler function to avoid signal lost.(不會 race condition)，handler 裡會發現 signal 被 blocked。
+
+`int sigaction(int signum, const struct sigaction *act,
+struct sigaction *oldact)`
+* `act`: new action
+* `oldact`: set to old action
+
+```c
+struct sigaction{
+    void (*sa_handler)(int);
+    sigset_t sa_mask;
+    int sa_flags;
+    void (*sa_sigaction)(int,siginfo_t*, void*); // input: (int signum, siginfo_t *info, void *ucontext)
+}
+```
+* `sa_flags`，只寫重要的，並且有些不重要的細節沒寫:
+  * `SA_INTERRUPT`: 會中斷 system call，不會自動 restart
+  * `SA_NODEFER`: 在 call handler 時不會 block signal，**注意這是 unreliable**。
+  * `SA_RESETHAND`: 在 call handler 之前把 disposition 設回 default，跟 **unreliable** 的行為一樣。
+  * `SA_RESTART`: 會自動 restart system call，但不是所有 system call 都會被 restart。
+  * `SA_SIGINFO`: 用 `sa_sigaction` 而不是 `sa_handler`，可以得到 `siginfo` 和 context。
+* `sa_mask`: additional signals to be blocked during the handler.
+
+`siginfo` 大致上就是各種錯誤處理會想用的資訊。  
+`ucontext` 其實是 `ucontext_t` struct，存了更多系統狀態，register、stack pointer 等等，一般不會用到。  
+
+### sigsetjmp and siglongjmp
+
+`int sigsetjmp(sigjmp_buf env, int savemask)`
+`void siglongjmp(sigjmp_buf env, int val)`
+Saves and restores the current signal mask in env if `savemask!=0`. For `setjmp` and `longjmp` some OS may not do this.  
+As usual, you should assume local variables are not restored. Again, variables in the register will be restored, but you cannot control what is in the register.
+
+### sigsuspend
+
+`int sigsuspend(const sigset_t *mask)` = `sigprocmask` + `pause`
+* Atomically block the signals in mask and suspend the process until a signal is caught or ternimates the process.  
+* Return when a signal is caught and the signal handler returns.  
+* The **signal mask is restored** before the handler is called.  
+
+相當於若被 on 起來(block)的那些 signal 發生，不會因此結束，會繼續等。  
+
+### Ex: Avoid race condition (Ch8)
+
+child 和 parent 一起用 unbuffered I/O 每次寫一個字，導致混在一起。  
+在 Ch15 用 pipe 解決，child 或 parent 要等對方時，用 read 把自己 suspend，等到對方在 pipe 寫東西時才繼續。這也可以用 signal 來做：  
+* 初始化 `TELL_WAIT`: 註冊 signal handler，並用 mask 避免在 `sigsuspend` 前就收到。
+* `TELL` 對方: parent 傳 `SIGUSR1`，child 傳 `SIGUSR2`
+* `WAIT` 對方: `sigsuspend`，並改回原本的 signal mask(假設等對方只有一次)
+
+**大重點**: `TELL_WAIT` 要在 `fork` 前執行，不然 fork 完，parent 可能在 child 還沒 `TELL_WAIT` 時就傳 signal(發生 race condition)，導致 `sigsuspend` 等不到。  
+一樣是 critical region 的觀念，若是包含 fork 前一小段才能避免剛 fork 完的問題。
+
+### Reliable real sleep
+
+Suspend until time expires or signal caught and the handler returns.  
+Problems: `alarm(10)`, 3 secs passed, `sleep(5)`
+Answer: If user set an alarm before, the alarm will be ignored.(Don't wait the remaining 2 secs, replace the SIGALRM) But the sleep may return early if the alarm rings.  
+
+Implementation: We can block alarm and use atomic `sigsuspend` to avoid `SIGALRM` comes between `alarm` and `pause` in `sleep1`.  
+
+### abort
+
+如同之前寫的
+1. 如果 `SIGABRT` 的 handler 是 `SIG_IGN`，設為 `SIG_DFL`(讀取、修改都用 `sigaction` 達成)
+2. 如果是 `SIG_DFL`(不是 catch)，就先 `fflush`
+3. 把目前的 signal mask 設為只有 `SIGABRT` 不 block，然後再 `kill` 自己(=`raise`)，利用 side effect(有一個不是 ignore 的 signal 才回傳，而只會是 `SIGABRT`)。
+4. 如果 `SIGABRT` 被 caught，則 `fflush`(剛才 catch 的話不會 fflush)、設為 `SIG_DFL` 並再 `kill` 一次。
+
+要 fflush 因為 `abort` 不像 `exit` 會 flush、atexit、釋放記憶體、關閉文件等，而 fflush 算是比較重要的(不然使用者不知道為什麼印不出來)。  
+
+## Critical region(session)
+
+避免在這個區塊，一些共享資源被修改造成 race condition(對資源)；或是 multi-thread 時，這個區塊被多個 thread 同時執行(對程式)。  
+這裡就是用 `sigprocmask` 來避免某些 signal 的 handler 會把某些資源修改，並且 critical region 在 `sigsuspend` 結束。  
+要嘛就避免同時 access 資源，要嘛就對資源上鎖(但同時還要避免 deadlock、race condition)。  
