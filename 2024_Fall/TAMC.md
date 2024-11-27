@@ -611,7 +611,9 @@ $(r,c,z)$當中，原本 $r=g^k$ 與 $c$ 是 uniformly random，而 $z=k-sc$ 是
 已知 $g, g^s$，所以 $r=g^k=g^{z+sc}=g^z\cdot (g^s)^c$。  
 且輸出的 distribution 與原本的相同(都是 uniform)  
 
-**Note**: 有 Simulator 也不能 forge  signature，因為 Verifier 問的 Ch 幾乎不會是 Simulator 生出來的。  
+HVZK 的意思是在 verifier 是誠實(c 確實是 random)的情況下，會是 zero knowledge。  
+
+**Note**: 有 Simulator 也不能 forge signature，因為 Verifier 問的 Ch 幾乎不會是 Simulator 生出來的。  
 
 ### DL Assumption to DL Relation is Avg-Hard  
 
@@ -715,3 +717,102 @@ Another problem is that multiple $s$ may correspond to the same $t$. Somehow thi
 Simulate 出來的 $(com,ch,resp)=(r,c,z)$ 要 hide $k$，否則無法在不知道 $k$ 的情況下 simulate 出來。  
 但 SIS-based $z=k-sc$ 中，$k$ 是 mean 0 的 discrete Gaussian，所以 $z$ 相當於被平移 $sc$，所以 $z$ 可能包含一些 $k$ 的資訊。  
 解決的關鍵：with abort version。  
+
+# week 13 Zero Knowledge
+
+$\Sigma$-protocal for $R_{DL}$(honest verifier)  
+* Prover has $(s,g^s)$, Verifier has $(G,g,g^s)$  
+* Prover samples $k\gets\mathbb{Z}_q$  
+* Prover sends $r=g^k$  
+* Verifier sends $c\gets\mathbb{Z}_q$  
+* Prover sends $z=k-sc$  
+* Verifier checks if $g^z=r(g^s)^{-c}$  
+
+For some dishonest verifier, it may get $k$ from $r=g^k$, and sends $c=k$. Therefore it can know $s$ from $z$. 這個互動過程就無法 simulate，因為 $k$ 決定後， $z$ 就會被 $s$ 決定，但 $Sim$ 不知道 $s$。
+
+## definition of ZK
+
+A interactive protocal $(P,V)$ for a NP relation R is ZK if $\forall(x,y)\in R$, $\forall \text{PPT } V^*, \exists Sim s.t.$ the interaction of $(P,V^*)$ and the output of $Sim$ is computationally indistinguishable(or statistically indistinguishable).  
+可以互動很多次  
+
+## NP language
+
+For an NP language L, $\exists$ polynomial time $V$ s.t. $\forall x\in L, \exists$ witness $w$ s.t. $V(x,w)=1$. And $\forall x\not\in L, \forall$ witness $w$ $V(x,w)=0$.
+
+### example 3 coloring
+
+$L_{G3C}=\{G=(V,E)|\text{G is 3 colorable}\}$
+$L\in NP$, witness is a map $\phi:V\to {1,2,3}$
+
+### ZK for NP language L
+
+互動多次 $\langle P(w), V\rangle(x)$  
+* Completeness: $\forall x\in L$ and a valid witness $w$, $\Pr[\langle P(w), V\rangle(x)=\text{accept}]\ge 1-negl(|x|)$  
+* $\epsilon$-soundness: 壞人 prover 不能說服 verifier。$\forall$ malicious $P^*$, $\Pr[\langle P^*, V\rangle(x)=\text{accept}]\le \epsilon(|x|)$
+  * If only for PPT $P^*$, comp. soundness
+  * If for unbounded $P^*$, stat. soundness
+* ZK: $\forall$ malicious $V^*$, $\exists Sim$ s.t. $V^*$'s view from $\langle P(w), V^*\rangle(x)\approx Sim(x)$
+  * $V^*$ 必須是 PPT，不然自己就知道 witness，$Sim$ 也是一樣的道理
+  * 但兩個分布不可區分可以是 comp. 或 stat.
+
+## commitment scheme
+
+$Com=(C,R)$, committer(sender) and receiver  
+直覺理解: committer 傳送放在箱子裡的 m，receiver 不能打開，但在驗證階段(reveil phase)，committer 把鑰匙給 receiver，receiver 可以驗證當初傳的確實是 m。  
+* Binding: 不同的 m 對應到不同箱子  
+* Hiding: 只看到箱子不知道裡面裝什麼  
+
+正式定義:
+* Commit phase: C sends c to R(with decommitment d, maybe random tape)，可以很多次
+* Reveil phase: C sends m,d to R, open(m,c,d)=acc/rej
+* Binding: $\forall$ adversary as malicious C, it wins iff $open(m_0,c,d_0)=open(m_1,c,d_1)$=accept. $\Pr[\text{it wins}]$ is negligible.
+* Hiding(IND-based): 對於任何兩個 messages $m_0,m_1$, $\forall R^*$ 的 $view(\langle C(m_0),R^*\rangle)\approx_c view(\langle C(m_1),R^*\rangle)$
+
+一樣 binding, hiding 都有可能是 PPT 或 unbounded。但是不能兩個都 unbounded(left as exercise)
+
+### A construction from OWP
+
+For a OWP $f$ with its hardcore predicate $h$, we can construct a commitment scheme for 1 bit.  
+$Com(b), b\in\{0,1\}$
+* sample $r\gets\{0,1\}^n$
+* output $c=(f(r),h(r)\oplus b)$, keep $d=r$
+
+$open(b,c,d)$
+* acc iff $c=(f(d),h(d)\oplus b)$
+
+這會是 stat.(perfect) binding，因為一個 adversary 想找出 $(c_0=0,d_0), (c_1=1,d_1)$，但是 $d=r$ 決定後，$f(r)$ 和 $h(r)$ 都決定。  
+comp. binding，因為如果能區分 $c_0, c_1$ 會 break HC，而 unbounded adversary 可以直接算出 $r$ 再算 $h(r)$。  
+
+## ZK protocol for $L_{G3C}$
+
+[Related material](https://www.cs.cmu.edu/~goyal/s18/15503/scribe_notes/lecture23.pdf)
+
+用一個上面的 commitment scheme  
+
+$P(G,\phi)$
+* $\pi\gets S_3$, 三種顏色隨機的排序
+* $\psi=\pi(\phi)$
+* $\forall v\in V, (c_v,d_v)\gets Com(\phi_v)$
+* sends $Com(\phi)$
+
+$V(G)$
+* $e\gets E$
+* sends $e=(u,v)$
+* gets $\psi_u,d_u,\psi_v,d_v$
+* accept iff $open(\psi_u,c_u,d_u)\land open(\psi_v,c_v,d_v)\land \psi_u\ne\psi_v$
+
+Security
+* Completeness: yes
+* Soundness: $(1-\frac{1}{|E|})$-soundness
+* ZK  
+$V^*$ 的 view 是 $(G,com(\psi),V^*(com(\psi))=e=(u,v),\psi_u,d_u,\psi_v,d_v)$  
+對於一個圖 $G$，$Sim$ 隨便找一個邊亂塗不同顏色，其他點甚至可以都塗一樣的顏色，造出 $\psi'$，期待 verifier 剛好問到那條邊。如果不是的話，就 rewind 多試幾次。  
+直覺想為何 comp. indis.: $com(\psi')$ 如果與真正沒亂塗的 commitment 可分辨會 break commitment scheme 的 hiding。$\psi'_u,d_u,\psi'_v,d_v$ 是真的從 commitment 來的，所以好像也沒問題。  
+
+Hybrid argument: 從有 witness 的 $Hyb_{real}$ 到沒有 witness 的 $Sim$
+* $Hyb_{real}$: 原本的定義
+* $Hyb_1$: 指定一條邊 $e'$，若 $e\ne e'$ 就 rewind。  
+因為邊 $e'$ 還是隨機的，所以 view 的分布一模一樣。
+* $Hyb_2$: 把 $\psi$ 改得與 $\psi'$ 近一點。與 real 一樣 $\psi=\pi(\phi)$, $\psi'_u=\psi_u, \psi'_v=\psi_v$，但 $\psi'_w$ 隨便塗一個顏色(1)。
+view 裡的 $\psi$ 都改成奇怪的 $\psi'$，所以被改掉的只有 $com(\psi)$，裡面被改掉了很多點的 color。偷懶的講法: $Hyb_1$ 到 $Hyb_2$ 中間可以再有很多 hybrids，慢慢把 $\psi_w$ 改掉。如果能 break 的話就會 break commitment scheme 的 hiding。
+<!-- 待補 -->
