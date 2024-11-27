@@ -597,6 +597,7 @@ This simulates the real aggregation:
 * **小孩** = (simple, weak) hypothesis sets
 * **班級的共識** = blending 後的 hypothesis
 * **老師** = reweighting，讓 hypothesis 聚焦在錯誤的地方
+
 ### Use Bootstrap Again
 
 Bootstrapping 相當於把N筆資料重新給予權重，有些可能是 0，有些可能是很多次。  
@@ -710,8 +711,58 @@ b: child's condition, G: child's subtree's hypothesis
 #### 需要選擇的事
 * 停止條件
 * 小孩數量
-* 節點條件
+* 節點分枝條件
 * 葉節點的 hypothesis
 
 ### Classification and Regression Tree (CART)
-可以簡單的用 decision stump 來當作**節點條件**，**小孩數量**就是 2(binary tree)。  
+
+#### 節點分枝條件
+可以簡單的用 decision stump 來當作**節點分枝條件的 hypothesis set**，相對應的**小孩數量**就是 2(binary tree)。  
+
+**節點分枝條件的決定**：盡量找出分群後的結果能讓**不純程度**(用 Impurity Function 決定)最小的 hypothesis。差不多相當於 error function。  
+具體就是把不同群的 impurity function 以群的大小加權平均。  
+
+##### Impurity Function
+
+* $E_{\text{in}}$ of optimal constant hypothesis:
+  * Regression with MSE: $\bar y=\text{avg}(y_1,\ldots,y_n)$, $\text{impurity}=\frac{1}{N}\sum_{n=1}^N(y_n-\bar y)^2$
+  * Classification with 0-1 loss: $y^*=\text{majority}(y_1,\ldots,y_n)$, $\text{impurity}=\frac{1}{N}\sum_{n=1}^N[\![y_n\ne y^*]\!]$
+* Special for classification
+  * Gini index: $N_k=\sum_{n=1}^N[\![y_n=k]\!]$, $\text{impurity}=1-\sum_{k=1}^K\left(\frac{N_k}{N}\right)^2$  
+  考慮所有 $k$
+  * classification error: $\text{impurity}=1-\max_k\left(\frac{N_k}{N}\right)$  
+  只考慮最常見的 $k=y^*$
+
+分類通常用 Gini index，回歸用第一種。
+
+#### 停止條件
+
+CART 是 **fully-grown** tree，因此會分到不能分為止，具體有這些條件：  
+* Impurity=0，label 都一樣，沒辦法分
+* $x_n$ 都一樣，沒辦法分
+
+#### 葉節點的 hypothesis set
+
+因為結果會是不能繼續分的，可以直接用 optimal constant hypothesis。
+
+### Regularization by Pruning
+
+One regularizer: $\Omega(G)=\text{NumberOfLeaves}(G)$  
+變成對於所有的 decision tree $G$，找到 $\text{argmin}_G E_{\text{in}}(G)+\lambda\Omega(G)$  
+但當然無法找到所有的 decision tree，所以通常只會考慮：
+* $G^{(0)}$=fully-grown tree  
+* $G^{(i)}$=$\text{argmin}_G E_{\text{in}(G)}$  
+其中 $G$ 是從 $G^{(i-1)}$ 少掉一個葉節點。  
+
+找到 $\lambda$ 的方法：validation
+
+### 用類別特徵分枝
+
+對應到 decision stump，會用 decision subset。  
+$b(x)=[\![x_i\in S]\!]+1$，其中 $S\in[K]$  
+一樣是個二元樹，所以就是一個包含於 $S$、一個不包含於 $S$。
+
+### Surrogate branching
+
+用其他類似的特徵來取代缺失的特徵。  
+但實際上不一定能找到全部都沒有缺失的特徵，比如在 final project 大概就用不到。
