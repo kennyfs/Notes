@@ -18,8 +18,14 @@ MIT 畢業，去作 quant，然後加入 openai
 
 ### chain of thought  
 
-給一些範例思考過程，model 夠大(100B+)時才有效  
+給一些範例思考過程  
 [Wei et al](https://arxiv.org/abs/2201.11903):甚至只需要叫 model think step by step(zero shot-few shot)  
+**Insight**:  
+* model 夠大(100B+)時才有效  
+* 解決需要結構化思考的問題  
+* 減少 "mental load per token"，我猜是指不用根據 token 背下答案，而是能有思考過程。像是數學應用題，不用背下題目對應的答案(記下每一個 a-b 等於多少)，而是拆解問題(問自己 a-b 應該是多少)。在應用題的情境中，ab pair 出現次數可能不夠讓模型學會，但是拆解成整數減法相對容易。  
+* 從 pre-training 中的解釋、敘述，學到推理過程。  
+
 [Wang et al](https://arxiv.org/abs/2203.11171): 試很多次 different reasoning paths，用最常見的答案  
 solve ambiguous  
 
@@ -35,6 +41,11 @@ solve ambiguous
 
 [Tao et al](https://arxiv.org/abs/2305.10601): Tree of thought，有時候思考會分枝，external checker。  
 24 problem  
+**Insight**:  
+* search-based 的推論方法  
+* 可結合 MCTS DFS BFS 等經典搜尋演算法  
+* 可以用驗證來剪枝  
+* 限制: 計算成本、搜尋方式很重要、搜尋空間可能太大  
 
 ### ChatGPT-o1  
 
