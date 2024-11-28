@@ -932,52 +932,6 @@ prog1 < infile | tee fifo1 | prog2
 * **Deadlock**  
 * **race condition**  
 
-# Ch10 Signals
-
-File 在不同系統差異不大， Process 就開始有些差別(ex: wait)，而 Signal 差別更大(有些 system call 不reliable)，有些實際運行會有 race condition 等。  
-Ctrl-C 就是一個 signal，系統送給process。  
-
-> 比較：與 Interrupt 的差異  
-> Interrupt 的對象是 CPU，而 signal 是 process  
-> Interrupt 可能是 CPU 的一個接腳或內部產生，讓 CPU 暫停現在的 process 去某個 subroutine(ISR，interrupt subroutine，通常非常短)。  
-> Interrupt先記下發生什麼事，而signal是系統用來通知process。  
-> IRQ：Interrupt quest
-
-Signal 是 kernel 用來通知 process 重要事件的，由 kernel 定義。AKA software interrupt。編號通常是正整數，0 是特別意思（認ID）。  
-分成同步、非同步，像是 SIGCHILD 你也不知道小孩什麼時候會死，會是非同步。  
-
-## 產生 Signal 的狀況
-
-* Terminal-generated: Ctrl-C -> `SIGINT`
-* Exceptions: div by 0 -> `SIGFPE`, illegal memory access -> `SIGSEGV`
-* Function `kill`
-* Shell command kill: `SIGKILL`
-* Software condition: reader of pipe terminated -> `SIGPIPE`, alarm clock expires -> `SIGALRM`
-
-## process 的反應
-
-三擇一，沒寫就是 default
-* Ignore(`SIGKILL`, `SIGSTOP` cannot be ignored)
-對 undefined behavior 後果自負(ex: `SIGFPE`)
-* Catch(`SIGKILL`, `SIGSTOP` cannot be caught)
-ex: 收到 `SIGCHILD` 再 `waitpid`
-* Default: Terminate, ignore, stop.
-
-## Examples
-
-> signal: default action  
-> w/core = with core dump
-
-* `SIGABRT`: terminate w/core
-By calling `abort()`
-* `SIGALRM`: terminate
-By calling `setitimer()`, `alarm()`
-* `SIGBUS`: terminate w/core
-Implementation-defined HW fault
-Ex: 與處理器要求的對齊方式不同、未定義行為
-* `SIGCHILD`: ignore
-小孩狀態改變（執行、停止等）
-* `SIGCONT`: continue/ig
 # Ch10 Signals  
 
 File 在不同系統差異不大， Process 就開始有些差別(ex: wait)，而 Signal 差別更大(有些 system call 不reliable)，有些實際運行會有 race condition 等。  
@@ -1009,23 +963,69 @@ Signal 是 kernel 用來通知 process 重要事件的，由 kernel 定義。AKA
 ex: 收到 `SIGCHILD` 再 `waitpid`  
 * Default: Terminate, ignore, stop.  
 
-Default 通常是 Terminate、Ignore、Stop
+## Examples  
+
+> signal: default action  
+> w/core = with core dump  
+
+* `SIGABRT`: terminate w/core  
+By calling `abort()`  
+* `SIGALRM`: terminate  
+By calling `setitimer()`, `alarm()`  
+* `SIGBUS`: terminate w/core  
+Implementation-defined HW fault  
+Ex: 與處理器要求的對齊方式不同、未定義行為  
+* `SIGCHILD`: ignore  
+小孩狀態改變（執行、停止等）  
+* `SIGCONT`: continue/ig  
+# Ch10 Signals  
+
+File 在不同系統差異不大， Process 就開始有些差別(ex: wait)，而 Signal 差別更大(有些 system call 不reliable)，有些實際運行會有 race condition 等。  
+Ctrl-C 就是一個 signal，系統送給process。  
+
+> 比較：與 Interrupt 的差異  
+> Interrupt 的對象是 CPU，而 signal 是 process  
+> Interrupt 可能是 CPU 的一個接腳或內部產生，讓 CPU 暫停現在的 process 去某個 subroutine(ISR，interrupt subroutine，通常非常短)。  
+> Interrupt先記下發生什麼事，而signal是系統用來通知process。  
+> IRQ：Interrupt quest  
+
+Signal 是 kernel 用來通知 process 重要事件的，由 kernel 定義。AKA software interrupt。編號通常是正整數，0 是特別意思（認ID）。  
+分成同步、非同步，像是 SIGCHILD 你也不知道小孩什麼時候會死，會是非同步。  
+
+## 產生 Signal 的狀況  
+
+* Terminal-generated: Ctrl-C -> `SIGINT`  
+* Exceptions: div by 0 -> `SIGFPE`, illegal memory access -> `SIGSEGV`  
+* Function `kill`  
+* Shell command kill: `SIGKILL`  
+* Software condition: reader of pipe terminated -> `SIGPIPE`, alarm clock expires -> `SIGALRM`  
+
+## process 的反應  
+
+三擇一，沒寫就是 default  
+* Ignore(`SIGKILL`, `SIGSTOP` cannot be ignored)  
+對 undefined behavior 後果自負(ex: `SIGFPE`)  
+* Catch(`SIGKILL`, `SIGSTOP` cannot be caught)  
+ex: 收到 `SIGCHILD` 再 `waitpid`  
+* Default: Terminate, ignore, stop.  
+
+Default 通常是 Terminate、Ignore、Stop  
 ## List  
 
 > signal: default action  
 > w/core = with core dump  
 
-### 常見/重要
+### 常見/重要  
 
 | Signal    | Default Action   | Description                                                                                                                                    |
 | --------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SIGABRT` | Terminate w/core | By calling `abort()` |
-| `SIGALRM` | Terminate        | By calling `setitimer()`, `alarm()` |
+| `SIGABRT` | Terminate w/core | By calling `abort()`                                                                                                                           |
+| `SIGALRM` | Terminate        | By calling `setitimer()`, `alarm()`                                                                                                            |
 | `SIGCHLD` | Ignore           | Child process state change (e.g., execution, stopping)                                                                                         |
-| `SIGFPE` | Terminate w/core | Division by zero, floating point overflow, etc.                                                                                                |
-| `SIGHUP` | Terminate        | Originally used for terminal disconnection; now used to signal background processes (e.g., servers) for rereading config files(avoid stopping) |
-| `SIGINT` | Terminate        | DELETE/Ctrl-C                                                                                                                                  |
-| `SIGIO` | Terminate/Ignore | 最厲害非同步，叫系統讀到某個buffer，搞定後傳這個signal。=`SIGPOLL` |
+| `SIGFPE`  | Terminate w/core | Division by zero, floating point overflow, etc.                                                                                                |
+| `SIGHUP`  | Terminate        | Originally used for terminal disconnection; now used to signal background processes (e.g., servers) for rereading config files(avoid stopping) |
+| `SIGINT`  | Terminate        | DELETE/Ctrl-C                                                                                                                                  |
+| `SIGIO`   | Terminate/Ignore | 最厲害非同步，叫系統讀到某個buffer，搞定後傳這個signal。=`SIGPOLL`                                                                             |
 | `SIGKILL` | Terminate        | Cannot be ignored or caught                                                                                                                    |
 | `SIGPIPE` | Terminate        | reader of pipe/socket terminated                                                                                                               |
 | `SIGQUIT` | Terminate w/core | Ctrl-\，terminate foreground process                                                                                                           |
@@ -1033,273 +1033,274 @@ Default 通常是 Terminate、Ignore、Stop
 | `SIGSTOP` | Stop process     | Cannot be ignored or caught                                                                                                                    |
 | `SIGTSTP` | Stop process     | Ctrl-Z，可以catch                                                                                                                              |
 | `SIGTERM` | Terminate        | `kill` command                                                                                                                                 |
-| `SIGURG` | ignore           | 網路課，out-of-band data: 傳資料網路塞車，要維持品質                                                                                           |
+| `SIGURG`  | ignore           | 網路課，out-of-band data: 傳資料網路塞車，要維持品質                                                                                           |
 | `SIGUSR1` | Terminate        | user defined                                                                                                                                   |
 | `SIGUSR2` | Terminate        | user defined                                                                                                                                   |
 
 > Note: 鬧鐘、handler 都只有一次有效  
 
-### 不常見/不重要
+### 不常見/不重要  
 
 
 | Signal      | Default Action   | Description                                                                        |
 | ----------- | ---------------- | ---------------------------------------------------------------------------------- |
-| `SIGBUS` | Terminate w/core | Implementation-defined HW fault (e.g., memory alignment error, undefined behavior) |
-| `SIGCONT` | Continue/Ignore  | Continue a stopped process                                                         |
-| `SIGILL` | Terminate w/core | illegal hardware instruction, rarely seen                                          |
-| `SIGPROF` | terminate        | 鬧鐘響                                                                             |
-| `SIGPWR` | ignore           | ~~電池沒電~~，UPS沒電，init shutdowns the system                                   |
-| `SIGSYS` | Terminate w/core | Invalid sys call                                                                   |
+| `SIGBUS`    | Terminate w/core | Implementation-defined HW fault (e.g., memory alignment error, undefined behavior) |
+| `SIGCONT`   | Continue/Ignore  | Continue a stopped process                                                         |
+| `SIGILL`    | Terminate w/core | illegal hardware instruction, rarely seen                                          |
+| `SIGPROF`   | terminate        | 鬧鐘響                                                                             |
+| `SIGPWR`    | ignore           | ~~電池沒電~~，UPS沒電，init shutdowns the system                                   |
+| `SIGSYS`    | Terminate w/core | Invalid sys call                                                                   |
 | `SIGVTALRM` | Terminate        | 只看user CPU time的alarm                                                           |
-| `SIGWINCH` | ignore           | terminal size changed                                                              |
-| `SIGXCPU` | Terminate w/core | 超過soft CPU time limit                                                            |
-| `SIGXFSZ` | Terminate w/core | 超過soft soft file limit                                                           |
+| `SIGWINCH`  | ignore           | terminal size changed                                                              |
+| `SIGXCPU`   | Terminate w/core | 超過soft CPU time limit                                                            |
+| `SIGXFSZ`   | Terminate w/core | 超過soft soft file limit                                                           |
 
-### w/core but no core dump
+### w/core but no core dump  
 
-* non-owner setuid process
-* non-grp-owner setgid process
-* no access rights at the working dir
-* file is too big (`RLIMIT_CORE`)
+* non-owner setuid process  
+* non-grp-owner setgid process  
+* no access rights at the working dir  
+* file is too big (`RLIMIT_CORE`)  
 
-## Set Disposition of Signal to Handler
+## Set Disposition of Signal to Handler  
 
-```c
-typedef void (*sighandler_t)(int);
-sighandler_t signal(int signum, sighandler_t handler);
-```
+```c  
+typedef void (*sighandler_t)(int);  
+sighandler_t signal(int signum, sighandler_t handler);  
+```  
 設`sighandler_t`為指向(輸入 int，無輸出的函數)的指標。  
 `signal`會回傳之前的 handler。  
-```c
-#define SIG_ERR (void (*)())-1
-#define SIG_DFL (void (*)())0
-#define SIG_IGN (void (*)())1
-```
+```c  
+#define SIG_ERR (void (*)())-1  
+#define SIG_DFL (void (*)())0  
+#define SIG_IGN (void (*)())1  
+```  
 都是無輸入無輸出的函數指標，但數值亂設，讓 `signal` 去判斷，可當作 handler 使用。出問題時則回傳 SIG_ERR。  
 
-### Check current disposition
+### Check current disposition  
 
 想達成：若現在是 Ignore，則設為我的 handler。  
 由於沒有設計這樣的功能，可以這樣做：  
-```c
-int sig_int(); // 某 handler
-if(signal(SIGINT, SIG_IGN)!=SIG_IGN){
-    signal(SIGINT, sig_int);
-}
-```
+```c  
+int sig_int(); // 某 handler  
+if(signal(SIGINT, SIG_IGN)!=SIG_IGN){  
+    signal(SIGINT, sig_int);  
+}  
+```  
 
-### start-up
+### start-up  
 
-* fork：根據原則，沒有必要改的東西就會直接繼承，所以全部繼承。又因為 Memory 裡會有 handler，不會出問題。
-* exec：default 和 ignore 會繼承，但 catch 的 signal 由於新的程式無法 access handler，不會繼承。
+* fork：根據原則，沒有必要改的東西就會直接繼承，所以全部繼承。又因為 Memory 裡會有 handler，不會出問題。  
+* exec：default 和 ignore 會繼承，但 catch 的 signal 由於新的程式無法 access handler，不會繼承。  
 
-shell 會把 background process 的 interrupt、quit 設為 ignore，反正不會發生(?)
+shell 會把 background process 的 interrupt、quit 設為 ignore，反正不會發生(?)  
 
-## Interrupted System Calls
+## Interrupted System Calls  
 
 Interrupt 是很重要的機制，因為可以避免 busy waiting(?)  
-可以這樣寫：
-```c
-again:
-if((n=read(fd,buf,buf_size))<0){
-    if(errno==EINTR) // interrupted
-        goto again;
-}
-```
+可以這樣寫：  
+```c  
+again:  
+if((n=read(fd,buf,buf_size))<0){  
+    if(errno==EINTR) // interrupted  
+        goto again;  
+}  
+```  
 
-### Auto-restarting
+### Auto-restarting  
 
-為了簡化，4.2BSD 的 read 如果被中斷會自動 restart，方便但也有很多問題。
+為了簡化，4.2BSD 的 read 如果被中斷會自動 restart，方便但也有很多問題。  
 
-## Reentrant Functions
+## Reentrant Functions  
 
 因為在 handler 裡可能會再收到一次 signal，動作被中斷，所以 handler 裡要是能確保不會有問題的功能：  
 Reentrant Functions：可以被 safely recursively called  
 
 與 functional programming 的原則很像，但沒那麼極端。原則是不能用：  
-* 外部或共享的狀態、資源
-* 其他Non-reentrant function
+* 外部或共享的狀態、資源  
+* 其他Non-reentrant function  
 
-比如
-* global variable(standard I/O: printf, scanf)
-* pointer to a fixed address(POSIX.1 system database: getpwnam()等)
-* static(可視為只有該 func 可見的 global variable)
-* access file
-* 操作 heap 的東西(malloc、free)
+比如  
+* global variable(standard I/O: printf, scanf)  
+* pointer to a fixed address(POSIX.1 system database: getpwnam()等)  
+* static(可視為只有該 func 可見的 global variable)  
+* access file  
+* 操作 heap 的東西(malloc、free)  
 
 Reentrant 少到可以正面表列。  
 
-Ex: 如果需要回傳一個 array，local variable會消失、static 和 malloc 也不行，解決辦法是一律叫參數直接傳 alloc 好的指標。（有點像 funcional programming 的精神）
+Ex: 如果需要回傳一個 array，local variable會消失、static 和 malloc 也不行，解決辦法是一律叫參數直接傳 alloc 好的指標。（有點像 funcional programming 的精神）  
 
-> printf 雖然不是 reentrant，但為了 debug 還是會用。
+> printf 雖然不是 reentrant，但為了 debug 還是會用。  
 
-**Note**: 因為原本的程式不知道自己被 signal 中斷，而 errno 在 handler 可能被改，所以 handler 通常在一開始存起來、最後設回去。(但還是有可能其他 signal 在存好前來，導致無法還原，這在 unreliable signal 無解，得要把 signal block 掉)
+**Note**: 因為原本的程式不知道自己被 signal 中斷，而 errno 在 handler 可能被改，所以 handler 通常在一開始存起來、最後設回去。(但還是有可能其他 signal 在存好前來，導致無法還原，這在 unreliable signal 無解，得要把 signal block 掉)  
 
-## Unreliable signals
+## Unreliable signals  
 
 **Signals could get lost!**  
-Ex 1: 註冊完只會有效一次，所以通常會在 handler 再 `signal` 註冊一次，但如果要處理的 signal 剛好在這之前來就會照 default。
+Ex 1: 註冊完只會有效一次，所以通常會在 handler 再 `signal` 註冊一次，但如果要處理的 signal 剛好在這之前來就會照 default。  
 
 Ex 2: 不想馬上處理 Ctrl-C，且 Ctrl-C 一定會來，來了之後才要繼續做事。  
 具體故事：  
-教授上課時知道當天有重要電話，但不能馬上接，可以
+教授上課時知道當天有重要電話，但不能馬上接，可以  
 1. 先接聽一秒問是誰打來的，用筆記寫下來，上課完再回電。  
 對應到在 handler 設一個 flag，做完要做的事若 flag 沒被設(上完課電話都還沒來)，就 `pause` 直到 flag 被設(待在教室等電話來)。  
 2. 開飛航模式，上課完才接電話(但是這裡比較特別，對方打電話不通會一直嘟嘟嘟不會 timeout)。  
 對應到把 signal block 掉，做完事再 `sigsuspend`(上完課再解除飛航模式)。  
 
-下面是第一種作法：
-```c=
-int flag=0;
-main(){
-  signal(SIGINT, handler);
-  ...
-  while(flag == 0)
-    pause(); // 等到flag=1(收到 signal)
-  // 做 Ctrl-C 時真的要做的事
-}
-handler(){
-  signal(SIGINT, handler);
-  flag=1;
-}
-```
-看起來沒問題，但如果 signal 在5、6行間來就會等到死，所以不能這樣寫。
+下面是第一種作法：  
+```c=  
+int flag=0;  
+main(){  
+  signal(SIGINT, handler);  
+  ...  
+  while(flag == 0)  
+    pause(); // 等到flag=1(收到 signal)  
+  // 做 Ctrl-C 時真的要做的事  
+}  
+handler(){  
+  signal(SIGINT, handler);  
+  flag=1;  
+}  
+```  
+看起來沒問題，但如果 signal 在5、6行間來就會等到死，所以不能這樣寫。  
 
-## Reliable signals
+## Reliable signals  
 
 * **signal generated**:  
 事件發生(在 PCB on 某個 bit)  
 * **signal delivered**:  
 process take action for the signal(deliver 可以被 block)  
 
-中間時間為 **pending**
+中間時間為 **pending**  
 
-### Block a signal
+### Block a signal  
 
 只能阻止 deliver，不能阻止 generate  
 A signal is blocked until: 1.) Being unblocked. 2.) Action becomes ignore.  
-* `sigpending(*set)`: 檢查 pending 的 signal，**blocked signal 也算 pending！**
-* `sigprocmask(how, *set, *old_set)`: 設定 **signal mask** (要擋哪些 signal)，與 cwd、umask 都是 independently inherited。
+* `sigpending(*set)`: 檢查 pending 的 signal，**blocked signal 也算 pending！**  
+* `sigprocmask(how, *set, *old_set)`: 設定 **signal mask** (要擋哪些 signal)，與 cwd、umask 都是 independently inherited。  
 
-#### block 時來 signal，再 unblock 會怎樣？
+#### block 時來 signal，再 unblock 會怎樣？  
 
-都是 depend on implementation
-* 同 signal 來很多次：POSIX 沒有定義。像感覺遮斷一樣，有可能會 deliver 很多次，但也可能只是 on PCB 的 bit，所以只有一次。
-* 不同 signal 的順序：POSIX 沒有定義。但有可能是最嚴重的優先(會 terminate 的)
+都是 depend on implementation  
+* 同 signal 來很多次：POSIX 沒有定義。像感覺遮斷一樣，有可能會 deliver 很多次，但也可能只是 on PCB 的 bit，所以只有一次。  
+* 不同 signal 的順序：POSIX 沒有定義。但有可能是最嚴重的優先(會 terminate 的)  
 
-## kill & raise
+## kill & raise  
 
-* `int kill(pid, signum)`: send `signum` to `pid`
-    * `pid>0`: to process
-    * `pid==0`: all processes with the same gid
-    * `pid<0`: to all processes with gid==-pid
-* `int raise(signum)`: send `signum` to myself.(=`getpid`+`kill`)
+* `int kill(pid, signum)`: send `signum` to `pid`  
+    * `pid>0`: to process  
+    * `pid==0`: all processes with the same gid  
+    * `pid<0`: to all processes with gid==-pid  
+* `int raise(signum)`: send `signum` to myself.(=`getpid`+`kill`)  
 
-### 可以 kill 的對象
+### 可以 kill 的對象  
 
-Real or effective UID of the sender == that of the receiver (both are processes)
+Real or effective UID of the sender == that of the receiver (both are processes)  
 
-### signum 0
+### signum 0  
 
-See if a process is alive.
-> 如果做的事是：如果某 process 是活的，則XXX。但有TOC-TOU問題（這種問題都是不常發生，但還是要避免）
+Don't send signal, but still check if a process is alive and we can send signal to it.  
+success: 0, fail: -1  
+> 如果做的事是：如果某 process 是活的，則XXX，這會有TOC-TOU問題（這種問題都是不常發生，但還是要避免）  
 
-### behavior on signal to itself
+### behavior on signal to itself  
 
 At least one (pending, unblocked) signal is **delivered** before `kill` or `raise` returns(不只這兩個).  
-**應用**: `abort`，關掉(block)其他 signal，保證結束前會收到自殺 signal。
+**應用**: `abort`，關掉(block)其他 signal，保證結束前會收到自殺 signal。  
 
-## alarm & pause
+## alarm & pause  
 
-* `unsigned int alarm(unsigned int secs)`: set alarm clock, return remaining time. Since default is termination, you have to catch it.
-* `int pause(void)`: suspend until signal comes. Return if a signal handler is executed and returns.
+* `unsigned int alarm(unsigned int secs)`: set alarm clock, return remaining time. Since default is termination, you have to catch it.  
+* `int pause(void)`: suspend until signal comes. Return if a signal handler is executed and returns.  
 
-### sleep1:
-```c
-sighandler_t sig_alrm(int signum){
-    // do nothing, just to wake up pause
-}
-int sleep1(int nsecs){
-    if((old_handler=signal(SIGALRM, sig_alrm))==SIG_ERR)
-        return nsecs;
-    alarm(nsecs);
-    // If the alarm somehow arrives here, the pause will never return (race condition).
-    pause();
-    return alarm(0); // turn off alarm
-}
-```
+### sleep1:  
+```c  
+sighandler_t sig_alrm(int signum){  
+    // do nothing, just to wake up pause  
+}  
+int sleep1(int nsecs){  
+    if((old_handler=signal(SIGALRM, sig_alrm))==SIG_ERR)  
+        return nsecs;  
+    alarm(nsecs);  
+    // If the alarm somehow arrives here, the pause will never return (race condition).  
+    pause();  
+    return alarm(0); // turn off alarm  
+}  
+```  
 
-## Nonlocal Jumps
+## Nonlocal Jumps  
 
-Powerful but dangerous user-level mechanism for transferring control to an arbitrary location.
+Powerful but dangerous user-level mechanism for transferring control to an arbitrary location.  
 
-### Stack Frame
+### Stack Frame  
 
-When a function is called, a stack frame is created. It contains:
-* return address
-* passed parameters
-* saved registers
-* local variables
+When a function is called, a stack frame is created. It contains:  
+* return address  
+* passed parameters  
+* saved registers  
+* local variables  
 
 Put in the stack of the virtual memory.  
-Problems:
-* Review: `setvbuf` 不能用 local variable 作為 buffer。
-* `f1()` call vfork and return, child exits after calling f2(that may clean `pid` in stack). **Parent cannot access `pid` in the stack.**
+Problems:  
+* Review: `setvbuf` 不能用 local variable 作為 buffer。  
+* `f1()` call vfork and return, child exits after calling f2(that may clean `pid` in stack). **Parent cannot access `pid` in the stack.**  
 
-### Longjmp & setjmp
+### Longjmp & setjmp  
 
-* `int setjmp(jmp_buf env)`: save the current context in `env`, return 0 if directly called, or `val` from `longjmp()`.
-* `void longjmp(jmp_buf env, int val)`: restore the context in `env`, return `val`.
+* `int setjmp(jmp_buf env)`: save the current context in `env`, return 0 if directly called, or `val` from `longjmp()`.  
+* `void longjmp(jmp_buf env, int val)`: restore the context in `env`, return `val`.  
 
-`jmp_buf` 可能記了不同東西， machine-dependent. 但通常會記:
-* CPU registers
-* stack pointers
-* return address
+`jmp_buf` 可能記了不同東西， machine-dependent. 但通常會記:  
+* CPU registers  
+* stack pointers  
+* return address  
 
 理論上要用在很深的 stack: A call B, B call C,... When an error occurs in C, then we can directly longjmp to A.  
 但其實 jmp 其實更 powerful，實際上可以亂跳。  
 
-#### Type qualifiers in C
+#### Type qualifiers in C  
 
-* `const`: read-only
-* `volatile`: may be changed by other means, must stored in memory instead of register
-* `restrict`: no other pointer can access the object (so no overlap)
-Ex: `void *memcpy(void *restrict dest, const void *restrict src, size_t n)` and `void *memmove(void *dest, const void *src, size_t n)`
+* `const`: read-only  
+* `volatile`: may be changed by other means, must stored in memory instead of register  
+* `restrict`: no other pointer can access the object (so no overlap)  
+Ex: `void *memcpy(void *restrict dest, const void *restrict src, size_t n)` and `void *memmove(void *dest, const void *src, size_t n)`  
 
-雖然 compile 時不一定能檢查會不會重複，但可能會檢查。
+雖然 compile 時不一定能檢查會不會重複，但可能會檢查。  
 
-#### (still imperfect) sleep2
+#### (still imperfect) sleep2  
 
-```c
-static jmp_buf env_alrm;
-static void sig_alrm(int signum){
-    longjmp(env_alrm, 1);
-}
-unsigned int sleep2(unsigned int nsecs){
-    if(signal(SIGALRM, sig_alrm)==SIG_ERR)
-        return nsecs;
-    if(setjmp(env_alrm)==0){
-        alarm(nsecs);
-        // alarm arrives here, handler jump to setjmp and return
-        pause(); // alarm arrives after calling pause, pause will 
-        // not return and still jump to setjmp and return.
-    }
-    return alarm(0); // remaining time(maybe waken up by other signal)
-}
-```
+```c  
+static jmp_buf env_alrm;  
+static void sig_alrm(int signum){  
+    longjmp(env_alrm, 1);  
+}  
+unsigned int sleep2(unsigned int nsecs){  
+    if(signal(SIGALRM, sig_alrm)==SIG_ERR)  
+        return nsecs;  
+    if(setjmp(env_alrm)==0){  
+        alarm(nsecs);  
+        // alarm arrives here, handler jump to setjmp and return  
+        pause(); // alarm arrives after calling pause, pause will  
+        // not return and still jump to setjmp and return.  
+    }  
+    return alarm(0); // remaining time(maybe waken up by other signal)  
+}  
+```  
 
 Problem: If another signal comes(say `SIG_INT`), the `SIG_INT` handler saves and tries to restore the `errno`. But before the saving is done, the alarm may come and change the unsaved `errno`.  
 雖然不完美但還是有可能這樣寫。  
 
-## alarm + pause
+## alarm + pause  
 
 * Can act as a timeout  
-(for slow system call like `read`). But need to worry about 
-  * race condition
-  * autorestart of `read`(Linux does)
-* timeout & restart by longjmp
+(for slow system call like `read`). But need to worry about  
+  * race condition  
+  * autorestart of `read`(Linux does)  
+* timeout & restart by longjmp  
 
-## Signal Sets
+## Signal Sets  
 
 > 要養成用預設型別的好習慣，像是 `sigset_t`, `pid_t`, `uid_t` 等。  
 
@@ -1311,133 +1312,266 @@ Problem: If another signal comes(say `SIG_INT`), the `SIG_INT` handler saves and
 
 ### sigprocmask  
 `sigprocmask(how, *set, *old_set)`  
-* `old_set`: return the old signal mask.
-* `how` can be `SIG_BLOCK`, `SIG_UNBLOCK`, `SIG_SETMASK`
-* If any unblocked signals are pending, at least one
-of unblocking signals will be delivered before the
+* `old_set`: return the old signal mask.  
+* `how` can be `SIG_BLOCK`, `SIG_UNBLOCK`, `SIG_SETMASK`  
+* If any unblocked signals are pending, at least one  
+of unblocking signals will be delivered before the  
 sigprocmask() returns.(as `kill` to myself and `raise`)  
 
 ### sigpending  
-`int sigpending(sigset_t *set)`
-return the set of signals that are blocked and pending.
+`int sigpending(sigset_t *set)`  
+return the set of signals that are blocked and pending.  
 
-### example 
+### example  
 
-```c
-static void sig_quit(int signum) {
-    printf("caught SIGQUIT\n");
-    signal(SIGQUIT, SIG_DFL);
-    // restored to default
-}
+```c  
+static void sig_quit(int signum) {  
+    printf("caught SIGQUIT\n");  
+    signal(SIGQUIT, SIG_DFL);  
+    // restored to default  
+}  
 
-int main(void) {
-    sigset_t newmask, oldmask, pendmask;
+int main(void) {  
+    sigset_t newmask, oldmask, pendmask;  
 
-    signal(SIGQUIT, sig_quit);
+    signal(SIGQUIT, sig_quit);  
 
-    sigemptyset(&newmask);
-    sigaddset(&newmask, SIGQUIT);
-    sigprocmask(SIG_BLOCK, &newmask, &oldmask);
-    // save original to oldmask so that we can restore it later
+    sigemptyset(&newmask);  
+    sigaddset(&newmask, SIGQUIT);  
+    sigprocmask(SIG_BLOCK, &newmask, &oldmask);  
+    // save original to oldmask so that we can restore it later  
 
-    sleep(5);
+    sleep(5);  
 
-    sigpending(&pendmask);
-    if (sigismember(&pendmask, SIGQUIT))
-        printf("\nSIGQUIT pending\n");
-        // 在等五秒期間希望 SIGQUIT 被 triggered
+    sigpending(&pendmask);  
+    if (sigismember(&pendmask, SIGQUIT))  
+        printf("\nSIGQUIT pending\n");  
+        // 在等五秒期間希望 SIGQUIT 被 triggered  
 
-    sigprocmask(SIG_SETMASK, &oldmask, NULL); // 在這個瞬間去處理 sig_quit
-    // 大多的系統只處理一次，所以如果在上面 sleep 按了很多次 ^\ ，還是會當作只有一次，先印出下面這行然後才結束。
-    printf("SIGQUIT unblocked\n");
+    sigprocmask(SIG_SETMASK, &oldmask, NULL); // 在這個瞬間去處理 sig_quit  
+    // 大多的系統只處理一次，所以如果在上面 sleep 按了很多次 ^\ ，還是會當作只有一次，先印出下面這行然後才結束。  
+    printf("SIGQUIT unblocked\n");  
 
-    sleep(5);
-    exit(0);
-}
-```
-## Reliable signal
+    sleep(5);  
+    exit(0);  
+}  
+```  
+## Reliable signal  
 
-### sigaction
+### sigaction  
 
-特色
-* **一次註冊終身有效**
-* 才是 **reliable** 版本
-* `signal` 可能是 call `sigaction`
-* Signal mask
-  * Additional signals can be masked before the handler function is called.
-  * The caught signal is **blocked** in the handler function to avoid signal lost.(不會 race condition)，handler 裡會發現 signal 被 blocked。
+特色  
+* **一次註冊終身有效**  
+* 才是 **reliable** 版本  
+* `signal` 可能是 call `sigaction`  
+* Signal mask  
+  * Additional signals can be masked before the handler function is called.  
+  * The caught signal is **blocked** in the handler function to avoid signal lost.(不會 race condition)，handler 裡會發現 signal 被 blocked。  
 
-`int sigaction(int signum, const struct sigaction *act,
-struct sigaction *oldact)`
-* `act`: new action
-* `oldact`: set to old action
+`int sigaction(int signum, const struct sigaction *act,  
+struct sigaction *oldact)`  
+* `act`: new action  
+* `oldact`: set to old action  
 
-```c
-struct sigaction{
-    void (*sa_handler)(int);
-    sigset_t sa_mask;
-    int sa_flags;
-    void (*sa_sigaction)(int,siginfo_t*, void*); // input: (int signum, siginfo_t *info, void *ucontext)
-}
-```
-* `sa_flags`，只寫重要的，並且有些不重要的細節沒寫:
-  * `SA_INTERRUPT`: 會中斷 system call，不會自動 restart
-  * `SA_NODEFER`: 在 call handler 時不會 block signal，**注意這是 unreliable**。
-  * `SA_RESETHAND`: 在 call handler 之前把 disposition 設回 default，跟 **unreliable** 的行為一樣。
-  * `SA_RESTART`: 會自動 restart system call，但不是所有 system call 都會被 restart。
-  * `SA_SIGINFO`: 用 `sa_sigaction` 而不是 `sa_handler`，可以得到 `siginfo` 和 context。
-* `sa_mask`: additional signals to be blocked during the handler.
+```c  
+struct sigaction{  
+    void (*sa_handler)(int);  
+    sigset_t sa_mask;  
+    int sa_flags;  
+    void (*sa_sigaction)(int,siginfo_t*, void*); // input: (int signum, siginfo_t *info, void *ucontext)  
+}  
+```  
+* `sa_flags`，只寫重要的，並且有些不重要的細節沒寫:  
+  * `SA_INTERRUPT`: 會中斷 system call，不會自動 restart  
+  * `SA_NODEFER`: 在 call handler 時不會 block signal，**注意這是 unreliable**。  
+  * `SA_RESETHAND`: 在 call handler 之前把 disposition 設回 default，跟 **unreliable** 的行為一樣。  
+  * `SA_RESTART`: 會自動 restart system call，但不是所有 system call 都會被 restart。  
+  * `SA_SIGINFO`: 用 `sa_sigaction` 而不是 `sa_handler`，可以得到 `siginfo` 和 context。  
+* `sa_mask`: additional signals to be blocked during the handler.  
 
 `siginfo` 大致上就是各種錯誤處理會想用的資訊。  
 `ucontext` 其實是 `ucontext_t` struct，存了更多系統狀態，register、stack pointer 等等，一般不會用到。  
 
-### sigsetjmp and siglongjmp
+### sigsetjmp and siglongjmp  
 
-`int sigsetjmp(sigjmp_buf env, int savemask)`
-`void siglongjmp(sigjmp_buf env, int val)`
+`int sigsetjmp(sigjmp_buf env, int savemask)`  
+`void siglongjmp(sigjmp_buf env, int val)`  
 Saves and restores the current signal mask in env if `savemask!=0`. For `setjmp` and `longjmp` some OS may not do this.  
-As usual, you should assume local variables are not restored. Again, variables in the register will be restored, but you cannot control what is in the register.
+As usual, you should assume local variables are not restored. Again, variables in the register will be restored, but you cannot control what is in the register.  
 
-### sigsuspend
+### sigsuspend  
 
-`int sigsuspend(const sigset_t *mask)` = `sigprocmask` + `pause`
+`int sigsuspend(const sigset_t *mask)` = `sigprocmask` + `pause`  
 * Atomically block the signals in mask and suspend the process until a signal is caught or ternimates the process.  
 * Return when a signal is caught and the signal handler returns.  
 * The **signal mask is restored** before the handler is called.  
 
 相當於若被 on 起來(block)的那些 signal 發生，不會因此結束，會繼續等。  
 
-### Ex: Avoid race condition (Ch8)
+### Ex: Avoid race condition (Ch8)  
 
 child 和 parent 一起用 unbuffered I/O 每次寫一個字，導致混在一起。  
 在 Ch15 用 pipe 解決，child 或 parent 要等對方時，用 read 把自己 suspend，等到對方在 pipe 寫東西時才繼續。這也可以用 signal 來做：  
-* 初始化 `TELL_WAIT`: 註冊 signal handler，並用 mask 避免在 `sigsuspend` 前就收到。
-* `TELL` 對方: parent 傳 `SIGUSR1`，child 傳 `SIGUSR2`
-* `WAIT` 對方: `sigsuspend`，並改回原本的 signal mask(假設等對方只有一次)
+* 初始化 `TELL_WAIT`: 註冊 signal handler，並用 mask 避免在 `sigsuspend` 前就收到。  
+* `TELL` 對方: parent 傳 `SIGUSR1`，child 傳 `SIGUSR2`  
+* `WAIT` 對方: `sigsuspend`，並改回原本的 signal mask(假設等對方只有一次)  
 
 **大重點**: `TELL_WAIT` 要在 `fork` 前執行，不然 fork 完，parent 可能在 child 還沒 `TELL_WAIT` 時就傳 signal(發生 race condition)，導致 `sigsuspend` 等不到。  
-一樣是 critical region 的觀念，若是包含 fork 前一小段才能避免剛 fork 完的問題。
+一樣是 critical region 的觀念，若是包含 fork 前一小段才能避免剛 fork 完的問題。  
 
-### Reliable real sleep
+### Reliable real sleep  
 
 Suspend until time expires or signal caught and the handler returns.  
-Problems: `alarm(10)`, 3 secs passed, `sleep(5)`
+Problems: `alarm(10)`, 3 secs passed, `sleep(5)`  
 Answer: If user set an alarm before, the alarm will be ignored.(Don't wait the remaining 2 secs, replace the SIGALRM) But the sleep may return early if the alarm rings.  
 
 Implementation: We can block alarm and use atomic `sigsuspend` to avoid `SIGALRM` comes between `alarm` and `pause` in `sleep1`.  
 
-### abort
+### abort  
 
-如同之前寫的
-1. 如果 `SIGABRT` 的 handler 是 `SIG_IGN`，設為 `SIG_DFL`(讀取、修改都用 `sigaction` 達成)
-2. 如果是 `SIG_DFL`(不是 catch)，就先 `fflush`
-3. 把目前的 signal mask 設為只有 `SIGABRT` 不 block，然後再 `kill` 自己(=`raise`)，利用 side effect(有一個不是 ignore 的 signal 才回傳，而只會是 `SIGABRT`)。
-4. 如果 `SIGABRT` 被 caught，則 `fflush`(剛才 catch 的話不會 fflush)、設為 `SIG_DFL` 並再 `kill` 一次。
+如同之前寫的  
+1. 如果 `SIGABRT` 的 handler 是 `SIG_IGN`，設為 `SIG_DFL`(讀取、修改都用 `sigaction` 達成)  
+2. 如果是 `SIG_DFL`(不是 catch)，就先 `fflush`  
+3. 把目前的 signal mask 設為只有 `SIGABRT` 不 block，然後再 `kill` 自己(=`raise`)，利用 side effect(有一個不是 ignore 的 signal 才回傳，而只會是 `SIGABRT`)。  
+4. 如果 `SIGABRT` 被 caught，則 `fflush`(剛才 catch 的話不會 fflush)、設為 `SIG_DFL` 並再 `kill` 一次。  
 
 要 fflush 因為 `abort` 不像 `exit` 會 flush、atexit、釋放記憶體、關閉文件等，而 fflush 算是比較重要的(不然使用者不知道為什麼印不出來)。  
 
-## Critical region(session)
+## Critical region(session)  
 
 避免在這個區塊，一些共享資源被修改造成 race condition(對資源)；或是 multi-thread 時，這個區塊被多個 thread 同時執行(對程式)。  
 這裡就是用 `sigprocmask` 來避免某些 signal 的 handler 會把某些資源修改，並且 critical region 在 `sigsuspend` 結束。  
 要嘛就避免同時 access 資源，要嘛就對資源上鎖(但同時還要避免 deadlock、race condition)。  
+
+# Ch11 Threads  
+
+## The process model  
+
+<!-- explain process concept -->  
+* Resource grouping  
+  * Includes address space, open files, child processes, pending alarms, signal handlers, accounting information(CPU time, etc), etc.  
+* Single thread of execution  
+  * The entity scheduled for execution by the operating systemduled for execution on CPU  
+
+### Memory arrangement  
+
+* kernel space  
+  * open file descriptor table, etc  
+  * command line arguments, environment variables  
+* stack  
+  * local variables, stackframe(function parameters)  
+* heap  
+  * dynamic memory allocation  
+* global variables(uninitialized/initialized)  
+* text/instructions  
+  * function  
+
+## The thread model  
+
+a lightweght process, share some resources with other threads in the same process.  
+A thread has it's own  
+* program counter  
+* registers  
+* stack  
+* scheduling policy  
+* errno variable  
+* signal mask  
+
+## process vs thread  
+
+Process 就像陌生人，thread 就像兄弟姊妹。  
+* process  
+  * 可能是不同 user 的  
+  * 資源不易共享(為了安全)  
+  * cost 高  
+* thread(lightweight process)  
+  * 同個使用者的  
+  * share 大部分資源  
+  * threads 通常都平等，沒有 parent-child 關係(除了 pthread 的 main thread)  
+  * cost 低  
+
+Thread benefits  
+
+* asyncronous events(把其他 threads 的某 signal 擋掉，只有一個 thread 接收)  
+* share memory and file descriptors  
+* 一起做，提升 throughput  
+* response time(等 I/O 時，其他 thread 可以繼續做事)  
+
+Thread drawbacks  
+
+* be careful  
+* hard to debug  
+* 單核 CPU 不一定 threads 有用(但 I/O 有用)  
+
+> shared memory 是 IPC 最快的方法，因此 thread 很好用  
+
+## Implement threads  
+
+### User-level threads  
+
+Kernel 完全不知道有 threads  
+process 自己模擬 threads，自己做 thread table(tcb)，儲存 thread 狀態、switching、scheduling。  
+好處: system call 比較慢，自己 switch 比較快。
+
+> setjmp, longjmp:
+> * signal handling
+> * thread switching
+> * error handling
+
+ex: Old Linux, pthreads(POSIX standard)  
+
+#### Problem
+
+* 要自己用 non-blocking 或 I/O multiplexing 處理 blocking system call
+
+> preemptive/non-preemptive OS
+> * preemptive: OS 可以隨時把 CPU 拿走。現在的 OS 大多是 preemptive
+> * non-preemptive: 只有 thread 自己可以放棄 CPU
+
+* 因此在 non-preemptive OS，一個 thread 可能會 block 其他 thread。可以用 alarm signal 解決，一直讓 thread timeout
+
+### Kernel-level threads
+
+Kernel 知道 thread，所以可以用 kernel 的 thread scheduling。
+system call 可以 block，比較簡單。
+可以在同個 process 或不同 process 跑。
+ex: windows 2000/XP
+#### Problem
+
+* system call 的 cost 變高
+* destroy, create thread 的 cost 變高
+  * 可以 recycle
+
+### Hybrid threads
+
+想辦法結合兩者的好處，ex: Solaris
+
+## Thread support
+
+傳統 UNIX 只支援一個 process，所以會用各種 thread library，ex: POSIX pthreads, Win32 threads, SProc on SGI。  
+這邊只介紹 pthreads。  
+跟 fork 的概念類似，沒有必要不能 share 那就 share。  
+
+### create a thread
+
+`int pthread_create(pthread_t *thread, pthread_attr_t *attr, void *(*start_routine)(void *), void *arg)`
+
+- `thread`: New thread's ID
+- `attr`: Assign attributes for the new thread. NULL for default.
+- `start_routine`: The function that the new thread will run. void* 代表任何型態的 pointer。
+- `arg`: A pointer to the argument that will be passed to the start routine.
+
+跟 fork 一樣，不一定自己或新 thread 哪個先跑。沒有 parent-child 關係，return code 也不一定是 create 的 thread 接收。
+
+### thread ID
+
+* `pthread_t pthread_self()`: 得到自己的 thread ID
+* `int pthread_equal(pthread_t t1, pthread_t t2)`: 比較兩個 thread ID 是否相同，非零代表相同。
+
+### thread attributes
+
+`pthread_attr_t` 是一個 struct，可以設定 thread 的 attributes。
+* `int pthread_attr_init(pthread_attr_t *attr)`: 得到 attributes 的初始值  
+* `int pthread_attr_destroy(pthread_attr_t *attr)`: 銷毀 attributes
+
+<!-- 剩下的待補，要看影片 -->
