@@ -1,4 +1,10 @@
-TAMC  
+---
+title: TAMC 筆記
+tags: [2024_Fall]
+---
+<!-- HackMD ID:nl89K4CtSjObpBfyi14h_A -->  
+
+TAMC 筆記  
 ===  
 # week 3  
 
@@ -195,10 +201,10 @@ Equivalent to replacing the i-th layer of the tree to be all independent $U_n$. 
 ## PKE(Public key encryption)  
 
 $PKE=(Key Gen, Enc, Dec)$  
-| Alice                   |      | Bob              |
-| ----------------------- | ---- | ---------------- |
-| $(pk,sk)\gets Gen(1^n)$ | pk-> | $ct=Enc_{pk}(m)$ |
-| m'=Dec{sk}(ct)          | <-ck |                  |
+| Alice                   |      | Bob              |  
+| ----------------------- | ---- | ---------------- |  
+| $(pk,sk)\gets Gen(1^n)$ | pk-> | $ct=Enc_{pk}(m)$ |  
+| m'=Dec{sk}(ct)          | <-ck |                  |  
 
 ct:cipher text, $ct\in\mathcal{C}_n$  
 The channel(pk,ct) may be public(everyone can access it), but assumed to be authenticated(no one can modify content).  
@@ -218,12 +224,12 @@ $$
 
 CPA: Chosen-Plaintext Attack  
 
-| Ch                      |         | Adv                |
-| ----------------------- | ------- | ------------------ |
-| $(pk,sk)\gets Gen(1^n)$ |         |                    |
-| $m\gets \mathcal{M} _n$ |         |                    |
-| $ct=Enc_{pk}(m)$        | pk,ct-> | $m'=   Adv(pk,ct)$ |
-| Adv wins if $m'=m$      | <-m'    |                    |
+| Ch                      |         | Adv                |  
+| ----------------------- | ------- | ------------------ |  
+| $(pk,sk)\gets Gen(1^n)$ |         |                    |  
+| $m\gets \mathcal{M} _n$ |         |                    |  
+| $ct=Enc_{pk}(m)$        | pk,ct-> | $m'=   Adv(pk,ct)$ |  
+| Adv wins if $m'=m$      | <-m'    |                    |  
 
 Secure if $\exists \text{ negl } \mu, s.t. \forall n\in\mathbb{N}, \Pr[Adv\text{ wins}]\le \mu(n)+\frac{1}{|\mathcal{M}_n|}$  
 
@@ -233,12 +239,12 @@ Secure if $\exists \text{ negl } \mu, s.t. \forall n\in\mathbb{N}, \Pr[Adv\text{
 
 ### IND-CPA  
 
-| Ch                      |                             | Adv |
-| ----------------------- | --------------------------- | --- |
-| $(pk,sk)\gets Gen(1^n)$ | pk->                        |     |
-| $b\gets\{0,1\}$         | <-$m_0,m_1\in\mathcal{M}_n$ |     |
-| $ct=Enc_{pk}(m_b)$      | ct->                        |     |
-| $Adv$ wins if $b'=b$    | <-b'                        |     |
+| Ch                      |                             | Adv |  
+| ----------------------- | --------------------------- | --- |  
+| $(pk,sk)\gets Gen(1^n)$ | pk->                        |     |  
+| $b\gets\{0,1\}$         | <-$m_0,m_1\in\mathcal{M}_n$ |     |  
+| $ct=Enc_{pk}(m_b)$      | ct->                        |     |  
+| $Adv$ wins if $b'=b$    | <-b'                        |     |  
 
 Secure if $\exists \text{ negl } \mu, s.t. \forall PPT Adv, n\in\mathbb{N}, \Pr[Adv\text{ wins}]\le \frac{1}{2}+\mu(n)$  
 
@@ -250,16 +256,16 @@ Some other people (Eve) may ask Alice what $m$ corresponds to a cipher text $ct$
 
 CCA: Chosen-Ciphertext Attack  
 
-| Ch                      |                             | Adv |
-| ----------------------- | --------------------------- | --- |
-| $(pk,sk)\gets Gen(1^n)$ | pk->                        |     |
-|                         | <-$ct_i$(Multiple times)    |     |
-|                         | $m_i=Dec_{sk}(ct_i)$->      |     |
-| $b\gets\{0,1\}$         | <-$m_0,m_1\in\mathcal{M}_n$ |     |
-| $ct=Enc_{pk}(m_b)$      | ct->                        |     |
-|                         | <-$ct_i$(Multiple times)    |     |
-|                         | $m_i=Dec_{sk}(ct_i)$->      |     |
-| $Adv$ wins if $b'=b$    | <-b'                        |     |
+| Ch                      |                             | Adv |  
+| ----------------------- | --------------------------- | --- |  
+| $(pk,sk)\gets Gen(1^n)$ | pk->                        |     |  
+|                         | <-$ct_i$(Multiple times)    |     |  
+|                         | $m_i=Dec_{sk}(ct_i)$->      |     |  
+| $b\gets\{0,1\}$         | <-$m_0,m_1\in\mathcal{M}_n$ |     |  
+| $ct=Enc_{pk}(m_b)$      | ct->                        |     |  
+|                         | <-$ct_i$(Multiple times)    |     |  
+|                         | $m_i=Dec_{sk}(ct_i)$->      |     |  
+| $Adv$ wins if $b'=b$    | <-b'                        |     |  
 
 先試很多次再收問題，然後可以再試很多次。  
 Secure定義和IND-CPA一樣  
@@ -284,10 +290,10 @@ Hard operation problems:
 
 #### DL assumption for $(G,q,g)$  
 
-| Ch                 |           | Adv |
-| ------------------ | --------- | --- |
-| $x\gets Z_q$       | $h=g^x$-> |     |
-| Adv wins if $x'=x$ | <-x'      |     |
+| Ch                 |           | Adv |  
+| ------------------ | --------- | --- |  
+| $x\gets Z_q$       | $h=g^x$-> |     |  
+| Adv wins if $x'=x$ | <-x'      |     |  
 
 $\forall PPT\ Adv,\exists \text{negl }\mu, s.t. \forall n, \Pr[Adv\text{ wins}]\le \mu(n)$  
 
@@ -331,27 +337,27 @@ $v\cdot u^{-sk}=(g^{sr}\cdot m)(g^r)^{-s}=m$
 
 Suppose not, $\exists PPT\ Adv$ breaks IND-CPA-secure. That is, $\exists \epsilon(n)=\frac{1}{poly(n)}$, such that  
 
-| Ch                           |                            | Adv |
-| ---------------------------- | -------------------------- | --- |
-| $(s,g^s)\gets Gen(1^n)$      | $pk=g^s$->                 |     |
-| $m_1\gets G(=\mathcal{M}_n)$ | <-$m_0$                    |     |
-| $b\gets \{0,1\}$             |                            |     |
-| $ct=Enc_{pk}(m_b)$           | $ct=(g^r,g^{sr}\cdot m)$-> |     |
-| Adv wins if $b'=b$           | <-$b'$                     |     |
+| Ch                           |                            | Adv |  
+| ---------------------------- | -------------------------- | --- |  
+| $(s,g^s)\gets Gen(1^n)$      | $pk=g^s$->                 |     |  
+| $m_1\gets G(=\mathcal{M}_n)$ | <-$m_0$                    |     |  
+| $b\gets \{0,1\}$             |                            |     |  
+| $ct=Enc_{pk}(m_b)$           | $ct=(g^r,g^{sr}\cdot m)$-> |     |  
+| Adv wins if $b'=b$           | <-$b'$                     |     |  
 
 $\Pr[Adv\text{ wins}]\ge\frac{1}{2}+\epsilon(n)$  
 Claim: 給Adv選$m_0,m_1$和只給他選$m_0$，$m_1$隨機選是等價的  
 
 ### Construct a reduction R to break DDH  
 
-| Ch                   |                     | R   |                           | Adv |
-| -------------------- | ------------------- | --- | ------------------------- | --- |
-| $x,y,z\gets Z_q$     |                     |     |                           |     |
-| $b\gets \{0,1\}$     |                     |     |                           |     |
-| $w_0=g^{xy},w_1=g^z$ | $(g,g^x,g^y,w_b)$-> |     | $pk=g^x$->                |     |
-|                      |                     |     | <-$m_0$                   |     |
-|                      |                     |     | $ct=(g^y,w_b\cdot m_0)$-> |     |
-|                      | <-$b'$              |     | <-$b'$                    |     |
+| Ch                   |                     | R   |                           | Adv |  
+| -------------------- | ------------------- | --- | ------------------------- | --- |  
+| $x,y,z\gets Z_q$     |                     |     |                           |     |  
+| $b\gets \{0,1\}$     |                     |     |                           |     |  
+| $w_0=g^{xy},w_1=g^z$ | $(g,g^x,g^y,w_b)$-> |     | $pk=g^x$->                |     |  
+|                      |                     |     | <-$m_0$                   |     |  
+|                      |                     |     | $ct=(g^y,w_b\cdot m_0)$-> |     |  
+|                      | <-$b'$              |     | <-$b'$                    |     |  
 
 # week 9  
 
@@ -405,9 +411,13 @@ $SKE=(Gen, Enc, Dec)$
 
 ### Correctness  
 
-$\begin{align*}z&=v-u\cdot sk\\  
+$$  
+\begin{align*}  
+z&=v-u\cdot sk\\  
 &=(b+m\cdot\lfloor\frac{q}{2}\rfloor)-a\cdot s\\  
-&=m\cdot\lfloor\frac{q}{2}\rfloor+e\end{align*}$  
+&=m\cdot\lfloor\frac{q}{2}\rfloor+e  
+\end{align*}  
+$$  
 因此不會與$m$差太多  
 
 ## Regev's PKE  
@@ -430,22 +440,25 @@ $PKE=(Gen, Enc, Dec)$
 ### Correctness  
 
 $ct=(r^TA,(r^Tb)+m\cdot\lfloor\frac{q}{2}\rfloor)$  
-$\begin{align*}z&=v-u\cdot sk\\  
+$$  
+\begin{align*}  
+z&=v-u\cdot sk\\  
 &=(r^Tb+m\cdot\lfloor\frac{q}{2}\rfloor)-r^TAs\\  
 &=(r^TAs+r^Te+m\cdot\lfloor\frac{q}{2}\rfloor)-r^TAs\\  
 &=r^Te+m\cdot\lfloor\frac{q}{2}\rfloor\approx m\cdot\lfloor\frac{q}{2}\rfloor  
-\end{align*}$  
+\end{align*}  
+$$  
 
 ## Thm: Regev's PKE is IND-CPA secure  
 
 Suppose not, $\exists PPT\ Adv$ breaks IND-CPA-secure. That is, $\exists \epsilon(n)=\frac{1}{poly(n)}$, such that  
 
-| Ch                      |                 | Adv |
-| ----------------------- | --------------- | --- |
-| $(pk,sk)\gets Gen(1^n)$ | $pk=(A,b)$->    |     |
-| $B\gets \{0,1\}$        | <-$m_0=0,m_1=1$ |     |
-| $ct=Enc_{pk}(m_B)$      | $ct$->          |     |
-| Adv wins iff $B'=B$     | <-$B'$          |     |
+| Ch                      |                 | Adv |  
+| ----------------------- | --------------- | --- |  
+| $(pk,sk)\gets Gen(1^n)$ | $pk=(A,b)$->    |     |  
+| $B\gets \{0,1\}$        | <-$m_0=0,m_1=1$ |     |  
+| $ct=Enc_{pk}(m_B)$      | $ct$->          |     |  
+| Adv wins iff $B'=B$     | <-$B'$          |     |  
 
 $\Pr[Adv\text{ wins}]\ge\frac{1}{2}+\epsilon(n)$  
 
@@ -547,10 +560,10 @@ For the
 
 digital signature scheme=$(Gen, Sign, Vrfy)$ Vrfy=Verify  
 
-| Signer                   |               | Verifier                |
-| :----------------------- | :------------ | :---------------------- |
-| $(pk,sk)\gets Gen(1^n)$  | pk->          |                         |
-| $\sigma\gets Sign(sk,m)$ | $\sigma, m$-> | $0/1=Vrfy(pk,m,\sigma)$ |
+| Signer                   |               | Verifier                |  
+| :----------------------- | :------------ | :---------------------- |  
+| $(pk,sk)\gets Gen(1^n)$  | pk->          |                         |  
+| $\sigma\gets Sign(sk,m)$ | $\sigma, m$-> | $0/1=Vrfy(pk,m,\sigma)$ |  
 
 Completeness:  
 $$  
@@ -566,11 +579,11 @@ Adv 給定 $pk$，可以 query Ch 很多次 $m_i$，並得到對應的 $\sigma_i
 [DL(discrete log) assumption](#DL-assumption-for-Gqg)  
 
 Schnorr signature scheme(in ROM) is group-based:  
-| Signer                        |               | Verifier                                       |
-| :---------------------------- | :------------ | :--------------------------------------------- |
-| $s\gets \mathbb{Z}_q, pk=g^s$ | $(G,g,pk)$->  |                                                |
-| $k\gets \mathbb{Z}_q$         |               |                                                |
-| $\sigma=(g^k,H(g^k,m),k-sc)$  | $\sigma, m$-> | check if $c=H(g^k,m)$ & $g^z=\frac{g^k}{pk^c}$ |
+| Signer                        |               | Verifier                                       |  
+| :---------------------------- | :------------ | :--------------------------------------------- |  
+| $s\gets \mathbb{Z}_q, pk=g^s$ | $(G,g,pk)$->  |                                                |  
+| $k\gets \mathbb{Z}_q$         |               |                                                |  
+| $\sigma=(g^k,H(g^k,m),k-sc)$  | $\sigma, m$-> | check if $c=H(g^k,m)$ & $g^z=\frac{g^k}{pk^c}$ |  
 
 直覺會覺得要破Schnorr無論如何都需要破discrete log  
 證明需要許多步驟：  
@@ -586,11 +599,11 @@ Example:
 2. Discrete log problem. $R=\{(x,y)|x=(g,g^s),y=s\}$ is a NP-relation.  
 
 Prover想證明對於某個問題的某個x，他有答案y，但不想把答案透漏給Verifier，因此：  
-| Prover |                   | Verifier                  |
-| :----- | :---------------- | :------------------------ |
-|        | Commit(Com) ->    |                           |
-|        | <- Challenge(Ch)  |                           |
-|        | Response(Resp) -> | $0/1=Vrfy(x,Com,Ch,Resp)$ |
+| Prover |                   | Verifier                  |  
+| :----- | :---------------- | :------------------------ |  
+|        | Commit(Com) ->    |                           |  
+|        | <- Challenge(Ch)  |                           |  
+|        | Response(Resp) -> | $0/1=Vrfy(x,Com,Ch,Resp)$ |  
 
 當y真的是答案(is a witness for x) $(x,y)\in R$，V永遠輸出1：  
 $$  
@@ -621,64 +634,64 @@ HVZK 的意思是在 verifier 是誠實(c 確實是 random)的情況下，會是
 
 ## Digital Signature conti.  
 
-### Sigma protocol for average hard NP relation to ID scheme security
+### Sigma protocol for average hard NP relation to ID scheme security  
 
 Reduction by rewinding  
 Suppose $Adv$ breaks ID scheme security with advantage $\frac{1}{n^c}$, we can construct a reduction $R$ that breaks the average hard NP relation.  
 如果能夠用同樣的 commit 叫 $Adv$ 兩次，就能用 special soundness 的 Ext 來找出 witness。  
-所以需要 rewinding，因為 $Adv$ 是一個 PPT algorithm，假設它由兩部分組成，且隨機性是給定的，因此變成 deterministic：
-$$
-P_1^*(x;r)=x,r,Com
-$$
-$$
-P_2^*(x,Ch;r)=Resp
-$$
+所以需要 rewinding，因為 $Adv$ 是一個 PPT algorithm，假設它由兩部分組成，且隨機性是給定的，因此變成 deterministic：  
+$$  
+P_1^*(x;r)=x,r,Com  
+$$  
+$$  
+P_2^*(x,Ch;r)=Resp  
+$$  
 
 用 good $(x,r)$: $\Pr[Adv\text{ wins}|\text{input }(x,r)]\ge \frac{1}{2n^c}$  
 $\Pr[\text{good }(x,r)]\ge \frac{1}{2n^c}$  
 
-### Fiat-Shamir transformation in ROM
+### Fiat-Shamir transformation in ROM  
 
 Given RO $H$, we can construct a Signature scheme from an ID scheme. In other words, suppose there's an $Adv$ that breaks the EUF-CMA of the transformed signature scheme(acts as a Prover), we can construct a reduction $R$ that breaks the ID scheme.  
 $Adv$ is given access to a RO $H$ and a signature oracle $Sign_{sk}$, $R$ simulate them by:  
-* RO: lazy sampling
-* $Sign_{sk}$: use $Trans_{sk}$ oracle. 
+* RO: lazy sampling  
+* $Sign_{sk}$: use $Trans_{sk}$ oracle.  
 
-The key problem is that we need to answer to an interactive transcript but the $Adv$ can only generate a fixed transcript. So, a trivial solution doesn't work, and we have to generate a $Com$ earlier.
+The key problem is that we need to answer to an interactive transcript but the $Adv$ can only generate a fixed transcript. So, a trivial solution doesn't work, and we have to generate a $Com$ earlier.  
 
-The method is similar to that of FO transformation. Since $Adv$ wins if $ch^*=H(Com^*,m^*)$, it very likely needs to query $H$ for the the $ch^*$. So $R$ sends one $com$($i^*\gets[q_H]$) from the queries of the $H$ and set the result to be $ch$ from $Ch$. 
-## Lattice-based Signature
+The method is similar to that of FO transformation. Since $Adv$ wins if $ch^*=H(Com^*,m^*)$, it very likely needs to query $H$ for the the $ch^*$. So $R$ sends one $com$($i^*\gets[q_H]$) from the queries of the $H$ and set the result to be $ch$ from $Ch$.  
+## Lattice-based Signature  
 
-### SIS(Short Integer Solution) assumption
+### SIS(Short Integer Solution) assumption  
 
-| Ch                                            |                        | Adv |
-| --------------------------------------------- | ---------------------- | --- |
-| $A\overset{\$}\gets \mathbb{Z}_q^{n\times m}$ | $A$->                  |     |
-| wins iff $Av=0 \mod q$                        | <-$v\in\mathbb{Z}_q^m$ |     |
+| Ch                                            |                        | Adv |  
+| --------------------------------------------- | ---------------------- | --- |  
+| $A\overset{\$}\gets \mathbb{Z}_q^{n\times m}$ | $A$->                  |     |  
+| wins iff $Av=0 \mod q$                        | <-$v\in\mathbb{Z}_q^m$ |     |  
 
 Additional requirements:  
-* trivially, $v\ne 0$
-* $v$ 很短，$\|v\|_2\le \beta$
+* trivially, $v\ne 0$  
+* $v$ 很短，$\|v\|_2\le \beta$  
 
-This can be reduced to Lattice problems that are proven to be NP-hard.
+This can be reduced to Lattice problems that are proven to be NP-hard.  
 
-$n$ is the security parameter, $m$ should be sufficiently large(so that there's a solution), $q$ is a modulus(suff. large), $\beta$ is the shortness parameter. $q>\beta\cdot \textsf{poly}(n)$
+$n$ is the security parameter, $m$ should be sufficiently large(so that there's a solution), $q$ is a modulus(suff. large), $\beta$ is the shortness parameter. $q>\beta\cdot \textsf{poly}(n)$  
 
 不只找到 $Av=0$ 是 hard，找到隨便一個 $Av=t$ 也是 hard。  
 **Informal notes**:  
-Prover works in plaintext space, Verifier works in the ciphertext space.
+Prover works in plaintext space, Verifier works in the ciphertext space.  
 
-### Compare to Schnorr signature scheme(sigma protocol, based on DL assumption)
+### Compare to Schnorr signature scheme(sigma protocol, based on DL assumption)  
 
-(use non-homogeneous SIS)
-* Hide $sk$ and send $pk$
-  * DL hides $s$ in $pk=g^s$. 
-  * SIS hides $s$(short) in $t=As$.
-* Sigma protocal $(com,ch,resp)$
+(use non-homogeneous SIS)  
+* Hide $sk$ and send $pk$  
+  * DL hides $s$ in $pk=g^s$.  
+  * SIS hides $s$(short) in $t=As$.  
+* Sigma protocal $(com,ch,resp)$  
   * DL:  
 $k\gets \mathbb{Z}_q$, $com=r=g^k$->  
 <-$ch=c\in\mathbb{Z}_q$  
-$resp=z=k-sc$->
+$resp=z=k-sc$->  
   * SIS:  
 $k\gets\mathcal{D}_\sigma^m$, $com=Ak$->(discrete Gaussian)  
 <-$c=\begin{bmatrix}-d,\ldots,d\end{bmatrix}$  
@@ -687,38 +700,38 @@ accept iff $Az=r-c(As)$ and $z$ is short
 
 However, the SIS Sigma protocol is not a sigma protocol (no special soundness, no HVZK). So, we need to make a version with abort and achieve a type 1 ID scheme.  
 
-### ID scheme from SIS
+### ID scheme from SIS  
 
-$(Gen,P_1,P_2,V)$
-* $Gen(1^n)$
-  * $A\overset{\$}\gets\mathbb{Z}_q^{n\times m}$
+$(Gen,P_1,P_2,V)$  
+* $Gen(1^n)$  
+  * $A\overset{\$}\gets\mathbb{Z}_q^{n\times m}$  
   * $s\gets\begin{bmatrix}-d,\ldots,d\end{bmatrix}^m$  
-  * $pk=(A,t=As),sk=(A,s)$
-* $P$ and $V$: as in the comparison part
+  * $pk=(A,t=As),sk=(A,s)$  
+* $P$ and $V$: as in the comparison part  
 
 **Reduction**:  
 Use a similar special soundness argument.  
 Suppose a $Adv$ breaks the ID scheme, we can construct a reduction $R$ that breaks the SIS assumption.  
 $R$ samples a $s$ by himself and send $t=As$. $Adv$ similarly supports rewinding. So $R$ queries for a same $com=r$ and get $(c_1,z_1),(c_2,z_2)$, such that $Az_1=r-tc_1$ and $Az_2=r-tc_2$.  
-Therefore, $R$ can get a $v$ by:
-$$
-\begin{align*}
-A(z_1-z_2)&=-t(c_1-c_2)\\
-&=-As(c_1-c_2)\\
-A(z_1-z_2+s(c_1-c_2))&=0
-\end{align*}
-$$
+Therefore, $R$ can get a $v$ by:  
+$$  
+\begin{align*}  
+A(z_1-z_2)&=-t(c_1-c_2)\\  
+&=-As(c_1-c_2)\\  
+A(z_1-z_2+s(c_1-c_2))&=0  
+\end{align*}  
+$$  
 So $R$ can simply outputs $v=z_1-z_2+s(c_1-c_2)$.  
 A problem is that $v$ may not be short and $v$ maybe 0.(ignore this)  
-Another problem is that multiple $s$ may correspond to the same $t$. Somehow this can be solved.
+Another problem is that multiple $s$ may correspond to the same $t$. Somehow this can be solved.  
 
-### HVZK
+### HVZK  
 
 Simulate 出來的 $(com,ch,resp)=(r,c,z)$ 要 hide $k$，否則無法在不知道 $k$ 的情況下 simulate 出來。  
 但 SIS-based $z=k-sc$ 中，$k$ 是 mean 0 的 discrete Gaussian，所以 $z$ 相當於被平移 $sc$，所以 $z$ 可能包含一些 $k$ 的資訊。  
 解決的關鍵：with abort version。  
 
-# week 13 Zero Knowledge
+# week 13 Zero Knowledge  
 
 $\Sigma$-protocal for $R_{DL}$(honest verifier)  
 * Prover has $(s,g^s)$, Verifier has $(G,g,g^s)$  
@@ -728,91 +741,94 @@ $\Sigma$-protocal for $R_{DL}$(honest verifier)
 * Prover sends $z=k-sc$  
 * Verifier checks if $g^z=r(g^s)^{-c}$  
 
-For some dishonest verifier, it may get $k$ from $r=g^k$, and sends $c=k$. Therefore it can know $s$ from $z$. 這個互動過程就無法 simulate，因為 $k$ 決定後， $z$ 就會被 $s$ 決定，但 $Sim$ 不知道 $s$。
+For some dishonest verifier, it may get $k$ from $r=g^k$, and sends $c=k$. Therefore it can know $s$ from $z$. 這個互動過程就無法 simulate，因為 $k$ 決定後， $z$ 就會被 $s$ 決定，但 $Sim$ 不知道 $s$。  
 
-## definition of ZK
+## definition of ZK  
 
 A interactive protocal $(P,V)$ for a NP relation R is ZK if $\forall(x,y)\in R$, $\forall \text{PPT } V^*, \exists Sim s.t.$ the interaction of $(P,V^*)$ and the output of $Sim$ is computationally indistinguishable(or statistically indistinguishable).  
 可以互動很多次  
 
-## NP language
+## NP language  
 
-For an NP language L, $\exists$ polynomial time $V$ s.t. $\forall x\in L, \exists$ witness $w$ s.t. $V(x,w)=1$. And $\forall x\not\in L, \forall$ witness $w$ $V(x,w)=0$.
+For an NP language L, $\exists$ polynomial time $V$ s.t. $\forall x\in L, \exists$ witness $w$ s.t. $V(x,w)=1$. And $\forall x\not\in L, \forall$ witness $w$ $V(x,w)=0$.  
 
-### example 3 coloring
+### example 3 coloring  
 
-$L_{G3C}=\{G=(V,E)|\text{G is 3 colorable}\}$
-$L\in NP$, witness is a map $\phi:V\to {1,2,3}$
+$L_{G3C}=\{G=(V,E)|\text{G is 3 colorable}\}$  
+$L\in NP$, witness is a map $\phi:V\to {1,2,3}$  
 
-### ZK for NP language L
+### ZK for NP language L  
 
 互動多次 $\langle P(w), V\rangle(x)$  
 * Completeness: $\forall x\in L$ and a valid witness $w$, $\Pr[\langle P(w), V\rangle(x)=\text{accept}]\ge 1-negl(|x|)$  
-* $\epsilon$-soundness: 壞人 prover 不能說服 verifier。$\forall$ malicious $P^*$, $\Pr[\langle P^*, V\rangle(x)=\text{accept}]\le \epsilon(|x|)$
-  * If only for PPT $P^*$, comp. soundness
-  * If for unbounded $P^*$, stat. soundness
-* ZK: $\forall$ malicious $V^*$, $\exists Sim$ s.t. $V^*$'s view from $\langle P(w), V^*\rangle(x)\approx Sim(x)$
-  * $V^*$ 必須是 PPT，不然自己就知道 witness，$Sim$ 也是一樣的道理
-  * 但兩個分布不可區分可以是 comp. 或 stat.
+* $\epsilon$-soundness: 壞人 prover 不能說服 verifier。$\forall$ malicious $P^*$, $\Pr[\langle P^*, V\rangle(x)=\text{accept}]\le \epsilon(|x|)$  
+  * If only for PPT $P^*$, comp. soundness  
+  * If for unbounded $P^*$, stat. soundness  
+* ZK: $\forall$ malicious $V^*$, $\exists Sim$ s.t. $V^*$'s view from $\langle P(w), V^*\rangle(x)\approx Sim(x)$  
+  * $V^*$ 必須是 PPT，不然自己就知道 witness，$Sim$ 也是一樣的道理  
+  * 但兩個分布不可區分可以是 comp. 或 stat.  
 
-## commitment scheme
+## commitment scheme  
 
 $Com=(C,R)$, committer(sender) and receiver  
 直覺理解: committer 傳送放在箱子裡的 m，receiver 不能打開，但在驗證階段(reveil phase)，committer 把鑰匙給 receiver，receiver 可以驗證當初傳的確實是 m。  
 * Binding: 不同的 m 對應到不同箱子  
 * Hiding: 只看到箱子不知道裡面裝什麼  
 
-正式定義:
-* Commit phase: C sends c to R(with decommitment d, maybe random tape)，可以很多次
-* Reveil phase: C sends m,d to R, open(m,c,d)=acc/rej
-* Binding: $\forall$ adversary as malicious C, it wins iff $open(m_0,c,d_0)=open(m_1,c,d_1)$=accept. $\Pr[\text{it wins}]$ is negligible.
-* Hiding(IND-based): 對於任何兩個 messages $m_0,m_1$, $\forall R^*$ 的 $view(\langle C(m_0),R^*\rangle)\approx_c view(\langle C(m_1),R^*\rangle)$
+正式定義:  
+* Commit phase: C sends c to R(with decommitment d, maybe random tape)，可以很多次  
+* Reveil phase: C sends m,d to R, open(m,c,d)=acc/rej  
+* Binding: $\forall$ adversary as malicious C, it wins iff $open(m_0,c,d_0)=open(m_1,c,d_1)$=accept. $\Pr[\text{it wins}]$ is negligible.  
+* Hiding(IND-based): 對於任何兩個 messages $m_0,m_1$, $\forall R^*$ 的 $view(\langle C(m_0),R^*\rangle)\approx_c view(\langle C(m_1),R^*\rangle)$  
 
-一樣 binding, hiding 都有可能是 PPT 或 unbounded。但是不能兩個都 unbounded(left as exercise)
+一樣 binding, hiding 都有可能是 PPT 或 unbounded。但是不能兩個都 unbounded(left as exercise)  
 
-### A construction from OWP
+### A construction from OWP  
 
 For a OWP $f$ with its hardcore predicate $h$, we can construct a commitment scheme for 1 bit.  
-$Com(b), b\in\{0,1\}$
-* sample $r\gets\{0,1\}^n$
-* output $c=(f(r),h(r)\oplus b)$, keep $d=r$
+$Com(b), b\in\{0,1\}$  
+* sample $r\gets\{0,1\}^n$  
+* output $c=(f(r),h(r)\oplus b)$, keep $d=r$  
 
-$open(b,c,d)$
-* acc iff $c=(f(d),h(d)\oplus b)$
+$open(b,c,d)$  
+* acc iff $c=(f(d),h(d)\oplus b)$  
 
 這會是 stat.(perfect) binding，因為一個 adversary 想找出 $(c_0=0,d_0), (c_1=1,d_1)$，但是 $d=r$ 決定後，$f(r)$ 和 $h(r)$ 都決定。  
 comp. binding，因為如果能區分 $c_0, c_1$ 會 break HC，而 unbounded adversary 可以直接算出 $r$ 再算 $h(r)$。  
 
-## ZK protocol for $L_{G3C}$
+## ZK protocol for $L_{G3C}$  
 
-[Related material](https://www.cs.cmu.edu/~goyal/s18/15503/scribe_notes/lecture23.pdf)
+[Related material](https://www.cs.cmu.edu/~goyal/s18/15503/scribe_notes/lecture23.pdf)  
 
 用一個上面的 commitment scheme  
 
-$P(G,\phi)$
-* $\pi\gets S_3$, 三種顏色隨機的排序
-* $\psi=\pi(\phi)$
-* $\forall v\in V, (c_v,d_v)\gets Com(\phi_v)$
-* sends $Com(\phi)$
+$P(G,\phi)$  
+* $\pi\gets S_3$, 三種顏色隨機的排序  
+* $\psi=\pi(\phi)$  
+* $\forall v\in V, (c_v,d_v)\gets Com(\phi_v)$  
+* sends $Com(\phi)$  
 
-$V(G)$
-* $e\gets E$
-* sends $e=(u,v)$
-* gets $\psi_u,d_u,\psi_v,d_v$
-* accept iff $open(\psi_u,c_u,d_u)\land open(\psi_v,c_v,d_v)\land \psi_u\ne\psi_v$
+$V(G)$  
+* $e\gets E$  
+* sends $e=(u,v)$  
+* gets $\psi_u,d_u,\psi_v,d_v$  
+* accept iff $open(\psi_u,c_u,d_u)\land open(\psi_v,c_v,d_v)\land \psi_u\ne\psi_v$  
 
-Security
-* Completeness: yes
-* Soundness: $(1-\frac{1}{|E|})$-soundness
+Security  
+* Completeness: yes  
+* Soundness: $(1-\frac{1}{|E|})$-soundness  
 * ZK  
 $V^*$ 的 view 是 $(G,com(\psi),V^*(com(\psi))=e=(u,v),\psi_u,d_u,\psi_v,d_v)$  
 對於一個圖 $G$，$Sim$ 隨便找一個邊亂塗不同顏色，其他點甚至可以都塗一樣的顏色，造出 $\psi'$，期待 verifier 剛好問到那條邊。如果不是的話，就 rewind 多試幾次。  
 直覺想為何 comp. indis.: $com(\psi')$ 如果與真正沒亂塗的 commitment 可分辨會 break commitment scheme 的 hiding。$\psi'_u,d_u,\psi'_v,d_v$ 是真的從 commitment 來的，所以好像也沒問題。  
 
-Hybrid argument: 從有 witness 的 $Hyb_{real}$ 到沒有 witness 的 $Sim$
-* $Hyb_{real}$: 原本的定義
+Hybrid argument: 從有 witness 的 $Hyb_{real}$ 到沒有 witness 的 $Sim$  
+* $Hyb_{real}$: 原本的定義  
 * $Hyb_1$: 指定一條邊 $e'$，若 $e\ne e'$ 就 rewind。  
-因為邊 $e'$ 還是隨機的，所以 view 的分布一模一樣。
-* $Hyb_2$: 把 $\psi$ 改得與 $\psi'$ 近一點。與 real 一樣 $\psi=\pi(\phi)$, $\psi'_u=\psi_u, \psi'_v=\psi_v$，但 $\psi'_w$ 隨便塗一個顏色(1)。
-view 裡的 $\psi$ 都改成奇怪的 $\psi'$，所以被改掉的只有 $com(\psi)$，裡面被改掉了很多點的 color。偷懶的講法: $Hyb_1$ 到 $Hyb_2$ 中間可以再有很多 hybrids，慢慢把 $\psi_w$ 改掉。如果能 break 的話就會 break commitment scheme 的 hiding。
-<!-- 待補 -->
+因為邊 $e'$ 還是隨機的，所以 view 的分布一模一樣。  
+* $Hyb_2$: 把 $\psi$ 改得與 $\psi'$ 近一點。與 real 一樣 $\psi=\pi(\phi)$, $\psi'_u=\psi_u, \psi'_v=\psi_v$，但 $\psi'_w$ 隨便塗一個顏色(1)。  
+view 裡的 $\psi$ 都改成奇怪的 $\psi'$，所以被改掉的只有 $com(\psi)$，裡面被改掉了很多點的 color。偷懶的講法: $Hyb_1$ 到 $Hyb_2$ 中間可以再有很多 hybrids，慢慢把 $\psi_w$ 改掉。如果能 break 的話就會 break commitment scheme 的 hiding。  
+<!-- 待補 -->  
+
+# week 14 Fully Homomorphic Encryption  
+

@@ -1,3 +1,9 @@
+---
+title: Mark Chen 演講筆記
+tags: [2024_Fall, Speech]
+---
+<!-- HackMD ID:cTzDIFZGTI2g_Y_Mr-njFQ -->  
+
 # Mark Chen 演講 teaching GPTs to reason  
 
 Nov 25, 2024  
