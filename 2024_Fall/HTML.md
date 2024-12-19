@@ -1,4 +1,10 @@
-HTML  
+---
+title: HTML 筆記
+tags: [2024_Fall]
+---
+<!-- HackMD ID:7-7lrIZvQLKgEgcXTYsyIg -->  
+
+HTML 筆記  
 ===  
 
 HTML week 3  
@@ -865,7 +871,7 @@ $$
 ### Regularization  
 
 Early Stopping: 因為 gradient descent 類型的 model 在步驟多了之後會探索更多區域，相當於 $d_{vc}$ 漸漸增大，因此可以用 validation error 早點停下來。但有可能 validation error, $E_{out}$ 會在之後再次下降。  
-這是早期流行的方法，現在會用 double descent，
+這是早期流行的方法，現在會用 double descent，  
 
 ## Deep learning  
 
